@@ -12,6 +12,8 @@ export interface GoogleUser {
   displayName: string;
   profilePicture?: string;
   role: number;
+  themePreference?: string;
+  notes?: string;
 }
 
 export const authService = {
@@ -62,5 +64,39 @@ export const authService = {
 
   isLoggedIn(): boolean {
     return !!this.getStoredUser();
+  },
+
+  async updateTheme(theme: string): Promise<boolean> {
+    try {
+      await api.post('/Account/theme', { theme });
+      
+      // Update stored user with new theme
+      const user = this.getStoredUser();
+      if (user) {
+        user.themePreference = theme;
+        localStorage.setItem('consilium_user', JSON.stringify(user));
+      }
+      
+      return true;
+    } catch {
+      return false;
+    }
+  },
+
+  async updateNotes(notes: string): Promise<boolean> {
+    try {
+      await api.post('/Account/notes', { notes });
+      
+      // Update stored user with new notes
+      const user = this.getStoredUser();
+      if (user) {
+        user.notes = notes;
+        localStorage.setItem('consilium_user', JSON.stringify(user));
+      }
+      
+      return true;
+    } catch {
+      return false;
+    }
   },
 };

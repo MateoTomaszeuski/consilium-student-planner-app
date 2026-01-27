@@ -17,11 +17,11 @@ export const todoService = {
   },
 
   async updateTodo(todo: TodoItem): Promise<void> {
-    await api.put(`/Todo/${todo.id}`, todo);
+    await api.patch('/Todo/update', todo);
   },
 
   async deleteTodo(id: number): Promise<void> {
-    await api.delete(`/Todo/${id}`);
+    await api.delete(`/Todo/remove/${id}`);
   },
 
   async addSubtask(parentId: number, subtask: Omit<TodoItem, 'id' | 'subtasks'>): Promise<void> {

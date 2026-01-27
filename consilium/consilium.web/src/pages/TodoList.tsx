@@ -94,7 +94,7 @@ export const TodoList = () => {
   };
 
   if (isLoading) {
-    return <div className="flex items-center justify-center min-h-[400px] text-xl">Loading todos...</div>;
+    return <div className="flex items-center justify-center min-h-100 text-xl">Loading todos...</div>;
   }
 
   const hasCompletedTasks = todos.some(t => t.isCompleted);
@@ -111,12 +111,12 @@ export const TodoList = () => {
             value={newTodoTitle}
             onChange={(e) => setNewTodoTitle(e.target.value)}
             onKeyDown={(e) => e.key === 'Enter' && addTodo()}
-            className="flex-1 px-4 py-2 border border-dark-med/30 rounded-lg focus:outline-none focus:ring-2 focus:ring-mid-green"
+            className="flex-1 px-4 py-2 border border-dark-med/30 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-mid-green"
           />
           <select
             value={newTodoCategory}
             onChange={(e) => setNewTodoCategory(e.target.value)}
-            className="px-4 py-2 border border-dark-med/30 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-mid-green min-w-[140px]"
+            className="px-4 py-2 border border-dark-med/30 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-mid-green min-w-35"
           >
             {CATEGORIES.map(cat => (
               <option key={cat} value={cat}>{cat}</option>

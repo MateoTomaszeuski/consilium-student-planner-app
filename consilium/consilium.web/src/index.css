@@ -11,6 +11,42 @@
   --color-light-light: #FAF7F2;
 }
 
+/* Theme-specific color overrides */
+[data-theme="Green"] {
+  --color-dark-green: #2E4237;
+  --color-mid-green: #719984;
+  --color-light-back: #F4EEE6;
+  --color-light-light: #FAF7F2;
+}
+
+[data-theme="Blue"] {
+  --color-dark-green: #1e3a8a;
+  --color-mid-green: #3b82f6;
+  --color-light-back: #eff6ff;
+  --color-light-light: #f0f9ff;
+}
+
+[data-theme="Purple"] {
+  --color-dark-green: #581c87;
+  --color-mid-green: #a855f7;
+  --color-light-back: #faf5ff;
+  --color-light-light: #fdf4ff;
+}
+
+[data-theme="Pink"] {
+  --color-dark-green: #9f1239;
+  --color-mid-green: #ec4899;
+  --color-light-back: #fef1f7;
+  --color-light-light: #fdf2f8;
+}
+
+[data-theme="Teal"] {
+  --color-dark-green: #115e59;
+  --color-mid-green: #14b8a6;
+  --color-light-back: #f0fdfa;
+  --color-light-light: #f0fdfa;
+}
+
 @layer base {
   :root {
     font-family: 'Inter', system-ui, Avenir, Helvetica, Arial, sans-serif;
@@ -22,5 +58,49 @@
 
   body {
     @apply m-0 min-h-screen w-full bg-light-back text-dark-dark;
+  }
+}
+
+@layer components {
+  /* React Calendar custom styling */
+  .react-calendar {
+    font-family: 'Inter', system-ui, sans-serif !important;
+    border: none !important;
+    padding: 1.5rem;
+  }
+
+  .react-calendar__tile {
+    @apply rounded-lg p-3 text-dark-dark;
+  }
+
+  .react-calendar__tile:enabled:hover,
+  .react-calendar__tile:enabled:focus {
+    @apply bg-light-med;
+  }
+
+  .react-calendar__tile--active {
+    @apply bg-mid-green text-white;
+  }
+
+  .react-calendar__tile--active:enabled:hover,
+  .react-calendar__tile--active:enabled:focus {
+    @apply bg-dark-green;
+  }
+
+  .react-calendar__tile--now {
+    @apply bg-light-light border border-mid-green;
+  }
+
+  .react-calendar__navigation button {
+    @apply text-dark-dark font-semibold text-lg;
+  }
+
+  .react-calendar__navigation button:enabled:hover,
+  .react-calendar__navigation button:enabled:focus {
+    @apply bg-light-med rounded-lg;
+  }
+
+  .react-calendar__month-view__weekdays {
+    @apply text-dark-med font-semibold;
   }
 }

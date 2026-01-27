@@ -1,5 +1,4 @@
 import { create } from 'zustand';
-import { persist } from 'zustand/middleware';
 import type { Theme, Note } from '../types';
 
 interface AppState {
@@ -10,15 +9,10 @@ interface AppState {
 }
 
 export const useAppStore = create<AppState>()(
-  persist(
-    (set) => ({
-      theme: 'Green',
-      notes: { title: '', content: '' },
-      setTheme: (theme) => set({ theme }),
-      setNotes: (notes) => set({ notes }),
-    }),
-    {
-      name: 'consilium-storage',
-    }
-  )
+  (set) => ({
+    theme: 'Green',
+    notes: { title: '', content: '' },
+    setTheme: (theme) => set({ theme }),
+    setNotes: (notes) => set({ notes }),
+  })
 );

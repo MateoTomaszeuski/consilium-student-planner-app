@@ -55,6 +55,8 @@ public class AccountController : ControllerBase {
             user.DisplayName,
             user.ProfilePicture,
             user.Role,
+            user.ThemePreference,
+            user.Notes,
             Message = "Sign-in successful"
         });
     }
@@ -79,8 +81,57 @@ public class AccountController : ControllerBase {
             user.Email,
             user.DisplayName,
             user.ProfilePicture,
-            user.Role
+            user.Role,
+            user.ThemePreference,
+            user.Notes
         });
+    }
+
+    [HttpPost("theme")]
+    public async Task<IActionResult> UpdateTheme([FromBody] UpdateThemeRequest request)
+    {
+        var email = Request.Headers["Email-Auth_Email"].FirstOrDefault();
+        
+        if (string.IsNullOrEmpty(email))
+        {
+            return BadRequest("Email header is required");
+        }
+
+        if (string.IsNullOrEmpty(request.Theme))
+        {
+            return BadRequest("Theme is required");
+        }
+
+        var success = await _authService.UpdateThemePreference(email, request.Theme);
+        
+        if (!success)
+        {
+            return NotFound("User not found");
+        }
+
+        _logger.LogInformation("Theme updated to {theme} for {email}", request.Theme, email);
+        return Ok(new { theme = request.Theme });
+    }
+
+    [HttpPost("notes")]
+    public async Task<IActionResult> UpdateNotes([FromBody] UpdateNotesRequest request)
+    {
+        var email = Request.Headers["Email-Auth_Email"].FirstOrDefault();
+        
+        if (string.IsNullOrEmpty(email))
+        {
+            return BadRequest("Email header is required");
+        }
+
+        var success = await _authService.UpdateNotes(email, request.Notes ?? "");
+        
+        if (!success)
+        {
+            return NotFound("User not found");
+        }
+
+        _logger.LogInformation("Notes updated for {email}", email);
+        return Ok(new { notes = request.Notes });
     }
 
     [HttpDelete("delete")]
@@ -100,4 +151,14 @@ public class AccountController : ControllerBase {
 public class GoogleSignInRequest
 {
     public string IdToken { get; set; } = "";
+}
+
+public class UpdateThemeRequest
+{
+    public string Theme { get; set; } = "";
+}
+
+public class UpdateNotesRequest
+{
+    public string? Notes { get; set; }
 }

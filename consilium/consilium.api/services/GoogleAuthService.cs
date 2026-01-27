@@ -123,6 +123,24 @@ public class GoogleAuthService
             new { Email = email }
         );
     }
+
+    public async Task<bool> UpdateThemePreference(string email, string theme)
+    {
+        var rowsAffected = await _db.ExecuteAsync(
+            @"UPDATE ""user"" SET theme_preference = @Theme WHERE email = @Email",
+            new { Email = email, Theme = theme }
+        );
+        return rowsAffected > 0;
+    }
+
+    public async Task<bool> UpdateNotes(string email, string notes)
+    {
+        var rowsAffected = await _db.ExecuteAsync(
+            @"UPDATE ""user"" SET notes = @Notes WHERE email = @Email",
+            new { Email = email, Notes = notes }
+        );
+        return rowsAffected > 0;
+    }
 }
 
 public class GoogleUserInfo
@@ -144,4 +162,6 @@ public class User
     public int Role { get; set; }
     public DateTime CreatedAt { get; set; }
     public DateTime? LastLogin { get; set; }
+    public string? ThemePreference { get; set; } = "Green";
+    public string? Notes { get; set; }
 }

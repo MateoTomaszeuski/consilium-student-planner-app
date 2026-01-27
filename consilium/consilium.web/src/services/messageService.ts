@@ -35,4 +35,14 @@ export const messageService = {
       return false;
     }
   },
+
+  async sendFeedback(feedback: string): Promise<boolean> {
+    try {
+      const response = await api.post('/NewFeature/feedback', { feedback });
+      return response.status === 200;
+    } catch (error) {
+      console.error('Failed to send feedback:', error);
+      return false;
+    }
+  },
 };

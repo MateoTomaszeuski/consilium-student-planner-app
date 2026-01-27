@@ -51,18 +51,6 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
                 Assignments
               </NavLink>
               <NavLink 
-                to="/chat" 
-                className={({ isActive }) => 
-                  `px-3 py-2 rounded-md text-sm font-semibold transition-colors ${
-                    isActive 
-                      ? 'bg-dark-green text-white' 
-                      : 'text-white/80 hover:bg-white/10'
-                  }`
-                }
-              >
-                Chat
-              </NavLink>
-              <NavLink 
                 to="/tools" 
                 className={({ isActive }) => 
                   `px-3 py-2 rounded-md text-sm font-semibold transition-colors ${
@@ -73,18 +61,6 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
                 }
               >
                 Tools
-              </NavLink>
-              <NavLink 
-                to="/stats" 
-                className={({ isActive }) => 
-                  `px-3 py-2 rounded-md text-sm font-semibold transition-colors ${
-                    isActive 
-                      ? 'bg-dark-green text-white' 
-                      : 'text-white/80 hover:bg-white/10'
-                  }`
-                }
-              >
-                Stats
               </NavLink>
               <NavLink 
                 to="/profile" 

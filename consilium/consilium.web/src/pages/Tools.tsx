@@ -1,4 +1,8 @@
-import { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
+import { useAppStore } from '../store/appStore';
+import { authService } from '../services/authService';
+import Calendar from 'react-calendar';
+import 'react-calendar/dist/Calendar.css';
 
 type Tool = 'Notes' | 'Calculator' | 'Pomodoro' | 'Calendar';
 
@@ -6,37 +10,53 @@ export const Tools = () => {
   const [activeTool, setActiveTool] = useState<Tool>('Notes');
 
   return (
-    <div className="tools">
-      <h1>Tools</h1>
+    <div className="max-w-6xl mx-auto">
+      <h1 className="text-3xl font-bold mb-8 text-dark-dark text-center">Tools</h1>
       
-      <div className="tool-selector">
+      <div className="flex gap-3 mb-8 justify-center flex-wrap">
         <button
-          className={activeTool === 'Notes' ? 'active' : ''}
+          className={`px-6 py-3 rounded-lg font-semibold transition-all ${
+            activeTool === 'Notes' 
+              ? 'bg-mid-green text-white shadow-md' 
+              : 'bg-light-light text-dark-dark border border-dark-med/20 hover:border-mid-green'
+          }`}
           onClick={() => setActiveTool('Notes')}
         >
           Notes
         </button>
         <button
-          className={activeTool === 'Calculator' ? 'active' : ''}
+          className={`px-6 py-3 rounded-lg font-semibold transition-all ${
+            activeTool === 'Calculator' 
+              ? 'bg-mid-green text-white shadow-md' 
+              : 'bg-light-light text-dark-dark border border-dark-med/20 hover:border-mid-green'
+          }`}
           onClick={() => setActiveTool('Calculator')}
         >
           Calculator
         </button>
         <button
-          className={activeTool === 'Pomodoro' ? 'active' : ''}
+          className={`px-6 py-3 rounded-lg font-semibold transition-all ${
+            activeTool === 'Pomodoro' 
+              ? 'bg-mid-green text-white shadow-md' 
+              : 'bg-light-light text-dark-dark border border-dark-med/20 hover:border-mid-green'
+          }`}
           onClick={() => setActiveTool('Pomodoro')}
         >
           Pomodoro
         </button>
         <button
-          className={activeTool === 'Calendar' ? 'active' : ''}
+          className={`px-6 py-3 rounded-lg font-semibold transition-all ${
+            activeTool === 'Calendar' 
+              ? 'bg-mid-green text-white shadow-md' 
+              : 'bg-light-light text-dark-dark border border-dark-med/20 hover:border-mid-green'
+          }`}
           onClick={() => setActiveTool('Calendar')}
         >
           Calendar
         </button>
       </div>
 
-      <div className="tool-content">
+      <div className="bg-light-light rounded-xl p-8 border border-dark-med/20 shadow-sm">
         {activeTool === 'Notes' && <NotesView />}
         {activeTool === 'Calculator' && <CalculatorView />}
         {activeTool === 'Pomodoro' && <PomodoroView />}
@@ -47,21 +67,40 @@ export const Tools = () => {
 };
 
 const NotesView = () => {
-  const [content, setContent] = useState(
-    localStorage.getItem('consilium_notes') || ''
-  );
+  const { notes, setNotes } = useAppStore();
+  const [content, setContent] = useState(notes.content || '');
+  const [isSaving, setIsSaving] = useState(false);
 
-  const handleChange = (value: string) => {
+  useEffect(() => {
+    // Load notes from stored user data
+    const user = authService.getStoredUser();
+    if (user?.notes) {
+      setContent(user.notes);
+      setNotes({ content: user.notes });
+    }
+  }, [setNotes]);
+
+  const handleChange = async (value: string) => {
     setContent(value);
-    localStorage.setItem('consilium_notes', value);
+    setNotes({ content: value });
+    
+    // Debounce the save to backend
+    setIsSaving(true);
+    await authService.updateNotes(value);
+    setIsSaving(false);
   };
 
   return (
-    <div className="notes-view">
+    <div className="w-full">
+      <div className="flex items-center justify-between mb-4">
+        <h2 className="text-2xl font-bold text-dark-dark">Quick Notes</h2>
+        {isSaving && <span className="text-sm text-dark-med">Saving...</span>}
+      </div>
       <textarea
         value={content}
         onChange={(e) => handleChange(e.target.value)}
         placeholder="Start typing your notes..."
+        className="w-full h-64 p-4 border border-dark-med/30 rounded-lg bg-white text-dark-dark focus:outline-none focus:ring-2 focus:ring-mid-green resize-y overflow-auto min-h-40 max-h-screen"
       />
     </div>
   );
@@ -128,68 +167,333 @@ const CalculatorView = () => {
   };
 
   return (
-    <div className="calculator-view">
-      <div className="calc-display">{display}</div>
-      <div className="calc-buttons">
-        <button onClick={handleClear}>C</button>
-        <button onClick={() => handleOperator('/')}>/</button>
-        <button onClick={() => handleOperator('*')}>*</button>
-        <button onClick={() => handleOperator('-')}>-</button>
-        <button onClick={() => handleDigit('7')}>7</button>
-        <button onClick={() => handleDigit('8')}>8</button>
-        <button onClick={() => handleDigit('9')}>9</button>
-        <button onClick={() => handleOperator('+')}>+</button>
-        <button onClick={() => handleDigit('4')}>4</button>
-        <button onClick={() => handleDigit('5')}>5</button>
-        <button onClick={() => handleDigit('6')}>6</button>
-        <button onClick={() => handleDigit('1')}>1</button>
-        <button onClick={() => handleDigit('2')}>2</button>
-        <button onClick={() => handleDigit('3')}>3</button>
-        <button onClick={() => handleDigit('0')} className="span-2">0</button>
-        <button onClick={() => handleDigit('.')}>.</button>
-        <button onClick={handleEquals} className="equals">=</button>
+    <div className="max-w-md mx-auto">
+      <h2 className="text-2xl font-bold mb-4 text-dark-dark text-center">Calculator</h2>
+      <div className="bg-white border border-dark-med/30 rounded-lg p-6 shadow-md">
+        <div className="bg-light-back border border-dark-med/20 rounded-lg p-4 mb-4 text-right text-2xl font-mono text-dark-dark min-h-15 flex items-center justify-end break-all">
+          {display}
+        </div>
+        <div className="grid grid-cols-4 gap-2">
+          <button 
+            onClick={handleClear} 
+            className="col-span-2 bg-red-500 hover:bg-red-600 text-white font-bold py-4 rounded-lg transition-colors"
+          >
+            C
+          </button>
+          <button 
+            onClick={() => handleOperator('/')} 
+            className="bg-mid-green hover:bg-dark-green text-white font-bold py-4 rounded-lg transition-colors"
+          >
+            /
+          </button>
+          <button 
+            onClick={() => handleOperator('*')} 
+            className="bg-mid-green hover:bg-dark-green text-white font-bold py-4 rounded-lg transition-colors"
+          >
+            *
+          </button>
+          
+          <button 
+            onClick={() => handleDigit('7')} 
+            className="bg-light-light hover:bg-light-med border border-dark-med/20 text-dark-dark font-bold py-4 rounded-lg transition-colors"
+          >
+            7
+          </button>
+          <button 
+            onClick={() => handleDigit('8')} 
+            className="bg-light-light hover:bg-light-med border border-dark-med/20 text-dark-dark font-bold py-4 rounded-lg transition-colors"
+          >
+            8
+          </button>
+          <button 
+            onClick={() => handleDigit('9')} 
+            className="bg-light-light hover:bg-light-med border border-dark-med/20 text-dark-dark font-bold py-4 rounded-lg transition-colors"
+          >
+            9
+          </button>
+          <button 
+            onClick={() => handleOperator('-')} 
+            className="bg-mid-green hover:bg-dark-green text-white font-bold py-4 rounded-lg transition-colors"
+          >
+            -
+          </button>
+          
+          <button 
+            onClick={() => handleDigit('4')} 
+            className="bg-light-light hover:bg-light-med border border-dark-med/20 text-dark-dark font-bold py-4 rounded-lg transition-colors"
+          >
+            4
+          </button>
+          <button 
+            onClick={() => handleDigit('5')} 
+            className="bg-light-light hover:bg-light-med border border-dark-med/20 text-dark-dark font-bold py-4 rounded-lg transition-colors"
+          >
+            5
+          </button>
+          <button 
+            onClick={() => handleDigit('6')} 
+            className="bg-light-light hover:bg-light-med border border-dark-med/20 text-dark-dark font-bold py-4 rounded-lg transition-colors"
+          >
+            6
+          </button>
+          <button 
+            onClick={() => handleOperator('+')} 
+            className="bg-mid-green hover:bg-dark-green text-white font-bold py-4 rounded-lg transition-colors"
+          >
+            +
+          </button>
+          
+          <button 
+            onClick={() => handleDigit('1')} 
+            className="bg-light-light hover:bg-light-med border border-dark-med/20 text-dark-dark font-bold py-4 rounded-lg transition-colors"
+          >
+            1
+          </button>
+          <button 
+            onClick={() => handleDigit('2')} 
+            className="bg-light-light hover:bg-light-med border border-dark-med/20 text-dark-dark font-bold py-4 rounded-lg transition-colors"
+          >
+            2
+          </button>
+          <button 
+            onClick={() => handleDigit('3')} 
+            className="bg-light-light hover:bg-light-med border border-dark-med/20 text-dark-dark font-bold py-4 rounded-lg transition-colors"
+          >
+            3
+          </button>
+          <button 
+            onClick={handleEquals} 
+            className="row-span-2 bg-dark-green hover:bg-dark-dark text-white font-bold rounded-lg transition-colors"
+          >
+            =
+          </button>
+          
+          <button 
+            onClick={() => handleDigit('0')} 
+            className="col-span-2 bg-light-light hover:bg-light-med border border-dark-med/20 text-dark-dark font-bold py-4 rounded-lg transition-colors"
+          >
+            0
+          </button>
+          <button 
+            onClick={() => handleDigit('.')} 
+            className="bg-light-light hover:bg-light-med border border-dark-med/20 text-dark-dark font-bold py-4 rounded-lg transition-colors"
+          >
+            .
+          </button>
+        </div>
       </div>
     </div>
   );
 };
 
 const PomodoroView = () => {
-  const [workTime] = useState(25);
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const timerIntervalRef = useRef<NodeJS.Timeout | null>(null);
+  
+  const [currentTimer, setCurrentTimer] = useState(1200);
+  const [breakTime, setBreakTime] = useState(300);
+  const [workTime, setWorkTime] = useState(1200);
   const [currentAction, setCurrentAction] = useState<'Working' | 'Break'>('Working');
-  const [timeLeft, setTimeLeft] = useState(workTime * 60);
-  const [isRunning, setIsRunning] = useState(false);
+
+  useEffect(() => {
+    renderFrame();
+  }, [currentTimer, currentAction, workTime, breakTime]);
+
+  const renderFrame = () => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+
+    ctx.clearRect(0, 0, 300, 300);
+
+    // Background
+    ctx.fillStyle = '#FAF7F2';
+    ctx.fillRect(0, 0, 300, 300);
+
+    // Background circle
+    ctx.fillStyle = 'white';
+    ctx.beginPath();
+    ctx.arc(150, 150, 123, 0, 2 * Math.PI);
+    ctx.fill();
+
+    // Progress arc
+    ctx.fillStyle = currentAction === 'Working' ? 'rgba(113, 153, 132, 0.6)' : 'rgba(163, 193, 176, 0.6)';
+    ctx.beginPath();
+    ctx.moveTo(150, 150);
+    ctx.lineTo(150, 37);
+    const percentage = currentAction === 'Working' 
+      ? (currentTimer / workTime) 
+      : (currentTimer / breakTime);
+    const endAngle = percentageToRadians(percentage * 100);
+    ctx.arc(150, 150, 112, (3 * Math.PI) / 2, endAngle);
+    ctx.lineTo(150, 150);
+    ctx.fill();
+
+    // Text
+    ctx.font = 'bold 36px Inter';
+    ctx.fillStyle = '#242424';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(toDuration(currentTimer), 150, 150);
+  };
+
+  const percentageToRadians = (percentage: number): number => {
+    const startAngle = (3 * Math.PI) / 2;
+    const fullCircle = 2 * Math.PI;
+    return startAngle + (fullCircle * (percentage / 100));
+  };
+
+  const startTimer = () => {
+    if (timerIntervalRef.current === null) {
+      timerIntervalRef.current = setInterval(() => {
+        setCurrentTimer(prev => {
+          const newTime = prev - 1;
+          
+          if (newTime <= 0) {
+            if (currentAction === 'Working') {
+              setCurrentAction('Break');
+              window.alert('Stop working! Time for a break.');
+              return breakTime;
+            } else {
+              setCurrentAction('Working');
+              window.alert('Start working!');
+              return workTime;
+            }
+          }
+          
+          return newTime;
+        });
+      }, 1000);
+    }
+  };
+
+  const stopTimer = () => {
+    if (timerIntervalRef.current !== null) {
+      clearInterval(timerIntervalRef.current);
+      timerIntervalRef.current = null;
+    }
+  };
+
+  const resetTimer = () => {
+    stopTimer();
+    setCurrentTimer(workTime);
+    setCurrentAction('Working');
+  };
+
+  const handleSetWorkTime = (n: number) => {
+    setWorkTime(n);
+    setTimeout(() => {
+      resetTimer();
+    }, 100);
+  };
+
+  const handleSetBreakTime = (n: number) => {
+    setBreakTime(n);
+    setTimeout(() => {
+      resetTimer();
+    }, 100);
+  };
 
   return (
-    <div className="pomodoro-view">
-      <div className="pomodoro-display">
-        <h2>{currentAction}</h2>
-        <div className="timer">
-          {Math.floor(timeLeft / 60)}:{String(timeLeft % 60).padStart(2, '0')}
+    <div className="max-w-2xl mx-auto">
+      <h2 className="text-2xl font-bold mb-4 text-dark-dark text-center">Pomodoro Timer</h2>
+      
+      <div className="flex flex-col items-center gap-4">
+        <canvas
+          ref={canvasRef}
+          width={300}
+          height={300}
+          className="rounded-lg shadow-md"
+        />
+
+        <div className="flex gap-3">
+          <button 
+            onClick={startTimer} 
+            className="px-6 py-2 bg-mid-green hover:bg-dark-green text-white font-bold rounded-lg transition-colors"
+          >
+            Start
+          </button>
+          <button 
+            onClick={stopTimer} 
+            className="px-6 py-2 bg-red-500 hover:bg-red-600 text-white font-bold rounded-lg transition-colors"
+          >
+            Stop
+          </button>
+          <button 
+            onClick={resetTimer} 
+            className="px-6 py-2 bg-dark-med hover:bg-dark-dark text-white font-bold rounded-lg transition-colors"
+          >
+            Reset
+          </button>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 w-full mt-2">
+          <div className="bg-white p-4 rounded-lg border border-dark-med/20">
+            <label className="block text-dark-dark font-semibold mb-2">Work Time (minutes)</label>
+            <select 
+              onChange={(e) => handleSetWorkTime(parseInt(e.target.value))} 
+              defaultValue={1200}
+              className="w-full px-4 py-2 border border-dark-med/30 rounded-lg bg-white text-dark-dark focus:outline-none focus:ring-2 focus:ring-mid-green"
+            >
+              <option value="600">10</option>
+              <option value="900">15</option>
+              <option value="1200">20</option>
+              <option value="1500">25</option>
+              <option value="1800">30</option>
+            </select>
+          </div>
+
+          <div className="bg-white p-4 rounded-lg border border-dark-med/20">
+            <label className="block text-dark-dark font-semibold mb-2">Break Time (minutes)</label>
+            <select 
+              onChange={(e) => handleSetBreakTime(parseInt(e.target.value))} 
+              defaultValue={300}
+              className="w-full px-4 py-2 border border-dark-med/30 rounded-lg bg-white text-dark-dark focus:outline-none focus:ring-2 focus:ring-mid-green"
+            >
+              <option value="60">1</option>
+              <option value="180">3</option>
+              <option value="300">5</option>
+              <option value="600">10</option>
+            </select>
+          </div>
         </div>
       </div>
-      <div className="pomodoro-controls">
-        <button onClick={() => setIsRunning(!isRunning)} className="btn-primary">
-          {isRunning ? 'Pause' : 'Start'}
-        </button>
-        <button onClick={() => {
-          setIsRunning(false);
-          setTimeLeft(workTime * 60);
-          setCurrentAction('Working');
-        }}>
-          Reset
-        </button>
-      </div>
     </div>
   );
 };
 
+function toDuration(seconds: number): string {
+  const minutes = Math.floor((seconds % 3600) / 60);
+  const secs = seconds % 60;
+  return `${minutes.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+}
+
 const CalendarView = () => {
-  const today = new Date();
-  
+  const [value, setValue] = useState<Date>(new Date());
+
   return (
-    <div className="calendar-view">
-      <h2>{today.toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}</h2>
-      <p>Calendar view - Feature coming soon</p>
+    <div className="max-w-3xl mx-auto">
+      <h2 className="text-2xl font-bold mb-6 text-dark-dark text-center">Calendar</h2>
+      <div className="calendar-container flex justify-center">
+        <Calendar
+          onChange={(value) => setValue(value as Date)}
+          value={value}
+          className="border border-dark-med/30 rounded-lg shadow-md bg-white"
+        />
+      </div>
+      <div className="mt-6 p-4 bg-white rounded-lg border border-dark-med/20 text-center">
+        <p className="text-dark-med">Selected Date:</p>
+        <p className="text-dark-dark font-bold text-lg">
+          {value.toLocaleDateString('en-US', { 
+            weekday: 'long', 
+            year: 'numeric', 
+            month: 'long', 
+            day: 'numeric' 
+          })}
+        </p>
+      </div>
     </div>
   );
-};
+}

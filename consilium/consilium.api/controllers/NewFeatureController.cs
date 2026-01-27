@@ -18,18 +18,33 @@ public class NewFeatureController : ControllerBase {
         logger.LogInformation("New featrure clicked");
         return "Received";
     }
-    [HttpGet("feedback/{feedback}")]
-    public async Task<string> GetFeedback(string feedback) {
-        logger.LogInformation("Feedback clicked");
+    
+    [HttpPost("feedback")]
+    public async Task<IResult> PostFeedback([FromBody] FeedbackRequest request) {
+        logger.LogInformation("Feedback received");
 
-        var payload = new { content = feedback };
-
-        var response = await client.PostAsJsonAsync("", payload);
-
-        if (!response.IsSuccessStatusCode) {
-            logger.LogError("Discord webhook failed with {StatusCode}", response.StatusCode);
+        if (string.IsNullOrWhiteSpace(request.Feedback)) {
+            return Results.BadRequest("Feedback cannot be empty");
         }
 
-        return "Received";
+        var payload = new { content = request.Feedback };
+
+        try {
+            var response = await client.PostAsJsonAsync("", payload);
+
+            if (!response.IsSuccessStatusCode) {
+                logger.LogError("Discord webhook failed with {StatusCode}", response.StatusCode);
+                return Results.StatusCode(500);
+            }
+
+            return Results.Ok("Received");
+        } catch (Exception e) {
+            logger.LogError("Error sending feedback: {Error}", e.Message);
+            return Results.StatusCode(500);
+        }
     }
+}
+
+public class FeedbackRequest {
+    public string Feedback { get; set; } = string.Empty;
 }

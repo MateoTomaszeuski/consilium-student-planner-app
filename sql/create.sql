@@ -7,7 +7,9 @@ CREATE TABLE
     profile_picture varchar(500) NULL,
     role int4 NOT NULL DEFAULT 0,
     created_at timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    last_login timestamp NULL
+    last_login timestamp NULL,
+    theme_preference varchar(20) DEFAULT 'Green',
+    notes text NULL
   );
 
 CREATE TABLE
