@@ -1,12 +1,12 @@
 FROM mcr.microsoft.com/dotnet/sdk:9.0 AS test
 
-WORKDIR /src/.
+WORKDIR /src
 COPY . .
 
-WORKDIR /src/Consilium
+WORKDIR /src/consilium
 
-RUN dotnet sln remove Consilium.Maui/Consilium.Maui.csproj
-RUN rm -rf Consilium.Maui
+RUN dotnet sln remove consilium.maui/Consilium.Maui.csproj
+RUN rm -rf consilium.maui
 
 RUN dotnet restore
 RUN dotnet format --verify-no-changes --no-restore

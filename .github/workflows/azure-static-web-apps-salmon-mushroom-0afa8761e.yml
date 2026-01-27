@@ -4,15 +4,58 @@ on:
   push:
     branches:
       - main
-  pull_request:
-    types: [opened, synchronize, reopened, closed]
-    branches:
-      - main
 
 jobs:
-  build_and_deploy_job:
-    if: github.event_name == 'push' || (github.event_name == 'pull_request' && github.event.action != 'closed')
+  frontend-linting:
     runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'pnpm'
+          cache-dependency-path: consilium/consilium.web/pnpm-lock.yaml
+
+      - name: Install frontend dependencies
+        run: cd consilium/consilium.web && pnpm install --frozen-lockfile
+
+      - name: Run ESLint
+        run: cd consilium/consilium.web && pnpm lint
+
+  frontend-build:
+    runs-on: ubuntu-latest
+    needs: [frontend-linting]
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'pnpm'
+          cache-dependency-path: consilium/consilium.web/pnpm-lock.yaml
+
+      - name: Install frontend dependencies
+        run: cd consilium/consilium.web && pnpm install --frozen-lockfile
+
+      - name: Build frontend (TypeScript check)
+        run: cd consilium/consilium.web && pnpm build
+
+  build_and_deploy_job:
+    runs-on: ubuntu-latest
+    needs: [frontend-build]
     name: Build and Deploy Job
     permissions:
        id-token: write
@@ -45,14 +88,3 @@ jobs:
           output_location: "dist" # Built app content directory - optional
           github_id_token: ${{ steps.idtoken.outputs.result }}
           ###### End of Repository/Build Configurations ######
-
-  close_pull_request_job:
-    if: github.event_name == 'pull_request' && github.event.action == 'closed'
-    runs-on: ubuntu-latest
-    name: Close Pull Request Job
-    steps:
-      - name: Close Pull Request
-        id: closepullrequest
-        uses: Azure/static-web-apps-deploy@v1
-        with:
-          action: "close"
