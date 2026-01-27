@@ -8,7 +8,6 @@ services:
       - 8080:8080
     environment:
       - DB_CONN=Host=db;Port=5432;Username=consilium-admin;Password=mypassword;Database=consiliumdb
-      - OTEL_URL=http://consilium-otel-collector:4317
     volumes:
       - ./volumes/consilium-uptime.txt:/app/publish/wwwroot/uptime.txt
     depends_on:

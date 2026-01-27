@@ -13,4 +13,50 @@ services:
       # - ./dbdata:/var/lib/postgresql/data
     ports:
       - 5432:5432
+    networks:
+      - consilium-network
     # command: ["postgres", "-c", "log_statement=all"] # Enables verbose logging
+
+  api:
+    container_name: consilium-api
+    build:
+      context: ./consilium
+      dockerfile: ../Dockerfiles/Dockerfile
+    restart: always
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_URLS=http://+:8080
+      - DB_CONN=Host=db;Database=consiliumdb;Username=consilium-admin;Password=mypassword
+      - EmailSettings__SmtpServer=smtp.gmail.com
+      - EmailSettings__Port=587
+      - EmailSettings__SenderName=Consilium Support
+      - EmailSettings__SenderEmail=${EMAIL_SENDER:-}
+      - EmailSettings__Password=${EMAIL_PASSWORD:-}
+    ports:
+      - 5202:8080
+    depends_on:
+      - db
+    networks:
+      - consilium-network
+
+  web:
+    image: node:20-alpine
+    container_name: consilium-web
+    ports:
+      - "5173:5173"
+    working_dir: /app
+    volumes:
+      - ./consilium/consilium.web:/app
+      - /app/node_modules
+    depends_on:
+      - api
+    environment:
+      - NODE_ENV=development
+      - VITE_API_BASE_URL=http://localhost:5202/
+    command: sh -c "corepack enable && corepack prepare pnpm@latest --activate && pnpm install && pnpm run dev"
+    networks:
+      - consilium-network
+
+networks:
+  consilium-network:
+    driver: bridge
