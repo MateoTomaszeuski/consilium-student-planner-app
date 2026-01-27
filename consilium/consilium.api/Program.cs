@@ -15,7 +15,6 @@ builder.Services.AddScoped<IDbConnection>(provider =>
 });
 
 builder.Services.AddScoped<GoogleAuthService>();
-builder.Services.AddSingleton<IEmailService, EmailService>();
 
 // Add CORS policy
 builder.Services.AddCors(options =>

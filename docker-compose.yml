@@ -29,11 +29,6 @@ services:
       - DB_CONN=Host=db;Database=${POSTGRES_DB};Username=${POSTGRES_USER};Password=${POSTGRES_PASSWORD}
       - GOOGLE_CLIENT_ID=${GOOGLE_CLIENT_ID}
       - GOOGLE_CLIENT_SECRET=${GOOGLE_CLIENT_SECRET}
-      - EmailSettings__SmtpServer=smtp.gmail.com
-      - EmailSettings__Port=587
-      - EmailSettings__SenderName=Consilium Support
-      - EmailSettings__SenderEmail=${EMAIL_SENDER:-}
-      - EmailSettings__Password=${EMAIL_PASSWORD:-}
     ports:
       - 5202:8080
     depends_on:
