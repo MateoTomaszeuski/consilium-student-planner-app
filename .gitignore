@@ -5,6 +5,7 @@
 
 #custom
 tsl/
+.pnpm-store
 
 # User-specific files
 *.rsuser
