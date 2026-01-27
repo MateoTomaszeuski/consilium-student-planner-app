@@ -20,8 +20,8 @@ services:
   api:
     container_name: consilium-api
     build:
-      context: ./consilium
-      dockerfile: ../Dockerfiles/Dockerfile
+      context: .
+      dockerfile: Dockerfiles/Dockerfile
     restart: always
     environment:
       - ASPNETCORE_ENVIRONMENT=${ASPNETCORE_ENVIRONMENT}
