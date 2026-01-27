@@ -1,5 +1,6 @@
 import { useEffect, useState, useCallback } from 'react';
 import { todoService } from '../services/todoService';
+import { authService } from '../services/authService';
 import type { TodoItem } from '../types';
 
 const CATEGORIES = ['Misc.', 'School', 'Work'];
@@ -22,6 +23,12 @@ export const TodoList = () => {
 
   const loadTodos = useCallback(async () => {
     setIsLoading(true);
+    
+    if (!authService.isLoggedIn()) {
+      setIsLoading(false);
+      return;
+    }
+    
     try {
       const data = await todoService.getTodos();
       setTodos(data);
@@ -95,6 +102,19 @@ export const TodoList = () => {
 
   if (isLoading) {
     return <div className="flex items-center justify-center min-h-100 text-xl">Loading todos...</div>;
+  }
+
+  if (!authService.isLoggedIn()) {
+    return (
+      <div className="space-y-8">
+        <h1 className="text-3xl font-bold text-center text-dark-dark">Todo List</h1>
+        <div className="bg-light-med border border-dark-med/30 rounded-lg p-6 text-center max-w-3xl mx-auto">
+          <p className="text-dark-dark">
+            You are in Guest mode. To use all features, please go to the Profile page and log in.
+          </p>
+        </div>
+      </div>
+    );
   }
 
   const hasCompletedTasks = todos.some(t => t.isCompleted);

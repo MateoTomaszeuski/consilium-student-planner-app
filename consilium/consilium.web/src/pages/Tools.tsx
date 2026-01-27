@@ -9,6 +9,19 @@ type Tool = 'Notes' | 'Calculator' | 'Pomodoro' | 'Calendar';
 export const Tools = () => {
   const [activeTool, setActiveTool] = useState<Tool>('Notes');
 
+  if (!authService.isLoggedIn()) {
+    return (
+      <div className="space-y-8">
+        <h1 className="text-3xl font-bold text-center text-dark-dark">Tools</h1>
+        <div className="bg-light-med border border-dark-med/30 rounded-lg p-6 text-center max-w-3xl mx-auto">
+          <p className="text-dark-dark">
+            You are in Guest mode. To use all features, please go to the Profile page and log in.
+          </p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="max-w-6xl mx-auto">
       <h1 className="text-3xl font-bold mb-8 text-dark-dark text-center">Tools</h1>

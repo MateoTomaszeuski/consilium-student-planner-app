@@ -7,6 +7,19 @@ const THEMES: Theme[] = ['Green', 'Blue', 'Purple', 'Pink', 'Teal'];
 export const Settings = () => {
   const { theme, setTheme } = useAppStore();
 
+  if (!authService.isLoggedIn()) {
+    return (
+      <div className="space-y-8">
+        <h1 className="text-3xl font-bold text-center text-dark-dark">Settings</h1>
+        <div className="bg-light-med border border-dark-med/30 rounded-lg p-6 text-center max-w-3xl mx-auto">
+          <p className="text-dark-dark">
+            You are in Guest mode. To use all features, please go to the Profile page and log in.
+          </p>
+        </div>
+      </div>
+    );
+  }
+
   const handleThemeChange = async (newTheme: Theme) => {
     setTheme(newTheme);
     await authService.updateTheme(newTheme);

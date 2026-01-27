@@ -1,5 +1,6 @@
 import { useEffect, useState, useCallback } from 'react';
 import { assignmentService } from '../services/assignmentService';
+import { authService } from '../services/authService';
 import type { Assignment, Course } from '../types';
 
 export const Assignments = () => {
@@ -18,6 +19,12 @@ export const Assignments = () => {
 
   const loadData = useCallback(async () => {
     setIsLoading(true);
+    
+    if (!authService.isLoggedIn()) {
+      setIsLoading(false);
+      return;
+    }
+    
     try {
       const [coursesData, assignmentsData] = await Promise.all([
         assignmentService.getAllCourses(),
@@ -97,6 +104,19 @@ export const Assignments = () => {
     return (
       <div className="flex items-center justify-center min-h-100">
         <div className="text-xl text-dark-dark">Loading assignments...</div>
+      </div>
+    );
+  }
+
+  if (!authService.isLoggedIn()) {
+    return (
+      <div className="space-y-8">
+        <h1 className="text-3xl font-bold text-center text-dark-dark">Assignments</h1>
+        <div className="bg-light-med border border-dark-med/30 rounded-lg p-6 text-center max-w-3xl mx-auto">
+          <p className="text-dark-dark">
+            You are in Guest mode. To use all features, please go to the Profile page and log in.
+          </p>
+        </div>
       </div>
     );
   }
