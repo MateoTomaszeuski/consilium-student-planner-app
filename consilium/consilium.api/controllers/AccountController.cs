@@ -1,5 +1,5 @@
-using Microsoft.AspNetCore.Mvc;
 using Consilium.API.Services;
+using Microsoft.AspNetCore.Mvc;
 
 namespace Consilium.API.Controllers;
 
@@ -16,41 +16,35 @@ public class AccountController : ControllerBase {
     }
 
     [HttpPost("google-signin")]
-    public async Task<IActionResult> GoogleSignIn([FromBody] GoogleSignInRequest request)
-    {
+    public async Task<IActionResult> GoogleSignIn([FromBody] GoogleSignInRequest request) {
         _logger.LogInformation("Google sign-in attempt");
 
-        if (string.IsNullOrEmpty(request.IdToken))
-        {
+        if (string.IsNullOrEmpty(request.IdToken)) {
             return BadRequest("ID token is required");
         }
 
         var googleUser = await _authService.ValidateGoogleToken(request.IdToken);
-        
-        if (googleUser == null)
-        {
+
+        if (googleUser == null) {
             _logger.LogWarning("Invalid Google token");
             return Unauthorized("Invalid Google token");
         }
 
-        if (!googleUser.EmailVerified)
-        {
+        if (!googleUser.EmailVerified) {
             _logger.LogWarning("Email not verified for {email}", googleUser.Email);
             return Unauthorized("Email not verified");
         }
 
         var user = await _authService.GetOrCreateUser(googleUser);
-        
-        if (user == null)
-        {
+
+        if (user == null) {
             _logger.LogError("Failed to create/get user for {email}", googleUser.Email);
             return StatusCode(500, "Failed to create user");
         }
 
         _logger.LogInformation("User {email} signed in successfully", user.Email);
 
-        return Ok(new
-        {
+        return Ok(new {
             user.Email,
             user.DisplayName,
             user.ProfilePicture,
@@ -62,22 +56,18 @@ public class AccountController : ControllerBase {
     }
 
     [HttpGet("user")]
-    public async Task<IActionResult> GetCurrentUser([FromQuery] string email)
-    {
-        if (string.IsNullOrEmpty(email))
-        {
+    public async Task<IActionResult> GetCurrentUser([FromQuery] string email) {
+        if (string.IsNullOrEmpty(email)) {
             return BadRequest("Email is required");
         }
 
         var user = await _authService.GetUserByEmail(email);
-        
-        if (user == null)
-        {
+
+        if (user == null) {
             return NotFound("User not found");
         }
 
-        return Ok(new
-        {
+        return Ok(new {
             user.Email,
             user.DisplayName,
             user.ProfilePicture,
@@ -88,24 +78,20 @@ public class AccountController : ControllerBase {
     }
 
     [HttpPost("theme")]
-    public async Task<IActionResult> UpdateTheme([FromBody] UpdateThemeRequest request)
-    {
+    public async Task<IActionResult> UpdateTheme([FromBody] UpdateThemeRequest request) {
         var email = Request.Headers["Email-Auth_Email"].FirstOrDefault();
-        
-        if (string.IsNullOrEmpty(email))
-        {
+
+        if (string.IsNullOrEmpty(email)) {
             return BadRequest("Email header is required");
         }
 
-        if (string.IsNullOrEmpty(request.Theme))
-        {
+        if (string.IsNullOrEmpty(request.Theme)) {
             return BadRequest("Theme is required");
         }
 
         var success = await _authService.UpdateThemePreference(email, request.Theme);
-        
-        if (!success)
-        {
+
+        if (!success) {
             return NotFound("User not found");
         }
 
@@ -114,19 +100,16 @@ public class AccountController : ControllerBase {
     }
 
     [HttpPost("notes")]
-    public async Task<IActionResult> UpdateNotes([FromBody] UpdateNotesRequest request)
-    {
+    public async Task<IActionResult> UpdateNotes([FromBody] UpdateNotesRequest request) {
         var email = Request.Headers["Email-Auth_Email"].FirstOrDefault();
-        
-        if (string.IsNullOrEmpty(email))
-        {
+
+        if (string.IsNullOrEmpty(email)) {
             return BadRequest("Email header is required");
         }
 
         var success = await _authService.UpdateNotes(email, request.Notes ?? "");
-        
-        if (!success)
-        {
+
+        if (!success) {
             return NotFound("User not found");
         }
 
@@ -135,10 +118,8 @@ public class AccountController : ControllerBase {
     }
 
     [HttpDelete("delete")]
-    public async Task<IActionResult> DeleteAccount([FromQuery] string email)
-    {
-        if (string.IsNullOrEmpty(email))
-        {
+    public async Task<IActionResult> DeleteAccount([FromQuery] string email) {
+        if (string.IsNullOrEmpty(email)) {
             return BadRequest("Email is required");
         }
 
@@ -148,17 +129,14 @@ public class AccountController : ControllerBase {
     }
 }
 
-public class GoogleSignInRequest
-{
+public class GoogleSignInRequest {
     public string IdToken { get; set; } = "";
 }
 
-public class UpdateThemeRequest
-{
+public class UpdateThemeRequest {
     public string Theme { get; set; } = "";
 }
 
-public class UpdateNotesRequest
-{
+public class UpdateNotesRequest {
     public string? Notes { get; set; }
 }

@@ -22,7 +22,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\consilium.shared\Consilium.Shared.csproj" />
+    <ProjectReference Include="..\consilium.shared\consilium.Shared.csproj" />
   </ItemGroup>
 
   <ItemGroup>

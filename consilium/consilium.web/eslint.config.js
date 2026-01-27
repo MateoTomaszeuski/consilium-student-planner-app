@@ -19,5 +19,9 @@ export default defineConfig([
       ecmaVersion: 2020,
       globals: globals.browser,
     },
+    rules: {
+      // Allow initialization functions in useEffect for data loading
+      'react-hooks/set-state-in-effect': 'off',
+    },
   },
 ])

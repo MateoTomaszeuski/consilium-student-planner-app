@@ -3,15 +3,15 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.13.35818.85
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Consilium.Maui", "Consilium.Maui\Consilium.Maui.csproj", "{A37A09FF-C270-4FFE-AFE4-B53C93DB67B5}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Consilium.Maui", "consilium.maui\consilium.Maui.csproj", "{A37A09FF-C270-4FFE-AFE4-B53C93DB67B5}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Consilium.Tests", "Consilium.Tests\Consilium.Tests.csproj", "{8533AB16-7EA9-4EE4-B8CA-1CD3E1EA7C0F}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Consilium.Tests", "consilium.tests\consilium.Tests.csproj", "{8533AB16-7EA9-4EE4-B8CA-1CD3E1EA7C0F}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Consilium.API", "Consilium.API\Consilium.API.csproj", "{0D9A4907-61D2-4987-A490-D4BC943A90BA}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Consilium.API", "consilium.api\consilium.API.csproj", "{0D9A4907-61D2-4987-A490-D4BC943A90BA}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Consilium.IntegrationTests", "Consilium.IntegrationTests\Consilium.IntegrationTests.csproj", "{8F6E329D-C71F-486A-818F-FBBF32F55EB5}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Consilium.IntegrationTests", "consilium.integrationtests\consilium.IntegrationTests.csproj", "{8F6E329D-C71F-486A-818F-FBBF32F55EB5}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Consilium.Shared", "Consilium.Shared\Consilium.Shared.csproj", "{9AD905D1-1A44-45C2-8191-E87035462621}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Consilium.Shared", "consilium.shared\consilium.Shared.csproj", "{9AD905D1-1A44-45C2-8191-E87035462621}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

@@ -157,7 +157,7 @@
 	</ItemGroup>
 
 	<ItemGroup>
-	  <ProjectReference Include="..\Consilium.Shared\Consilium.Shared.csproj" />
+	  <ProjectReference Include="..\consilium.shared\consilium.Shared.csproj" />
 	</ItemGroup>
 
 	<ItemGroup>

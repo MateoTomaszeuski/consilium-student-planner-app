@@ -2,8 +2,7 @@
 
 namespace Consilium.API.DBServices;
 
-public interface IEmailService
-{
+public interface IEmailService {
     Task SendValidationEmail(string email, string validationToken);
 }
 

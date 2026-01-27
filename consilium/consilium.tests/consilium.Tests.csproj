@@ -14,8 +14,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Consilium.API\Consilium.API.csproj" />
-    <ProjectReference Include="..\Consilium.Shared\Consilium.Shared.csproj" />
+    <ProjectReference Include="..\consilium.api\consilium.API.csproj" />
+    <ProjectReference Include="..\consilium.shared\consilium.Shared.csproj" />
   </ItemGroup>
 
 </Project>

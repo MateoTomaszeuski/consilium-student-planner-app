@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { todoService } from '../services/todoService';
 import type { TodoItem } from '../types';
 
@@ -20,15 +20,7 @@ export const TodoList = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [message, setMessage] = useState('');
 
-  useEffect(() => {
-    loadTodos();
-  }, []);
-
-  useEffect(() => {
-    applyFiltersAndSort();
-  }, [selectedCategory, sortOption]);
-
-  const loadTodos = async () => {
+  const loadTodos = useCallback(async () => {
     setIsLoading(true);
     try {
       const data = await todoService.getTodos();
@@ -39,12 +31,20 @@ export const TodoList = () => {
       setMessage('Failed to load todos');
     }
     setIsLoading(false);
-  };
+  }, []);
 
-  const applyFiltersAndSort = () => {
+  const applyFiltersAndSort = useCallback(() => {
     // This would be implemented with proper filtering and sorting logic
     // For now, just keeping the original array
-  };
+  }, []);
+
+  useEffect(() => {
+    loadTodos();
+  }, [loadTodos]);
+
+  useEffect(() => {
+    applyFiltersAndSort();
+  }, [selectedCategory, sortOption, applyFiltersAndSort]);
 
   const addTodo = async () => {
     if (!newTodoTitle.trim()) return;

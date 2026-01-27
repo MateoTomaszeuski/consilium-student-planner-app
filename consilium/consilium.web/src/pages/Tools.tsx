@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, useCallback } from 'react';
 import { useAppStore } from '../store/appStore';
 import { authService } from '../services/authService';
 import Calendar from 'react-calendar';
@@ -68,17 +68,19 @@ export const Tools = () => {
 
 const NotesView = () => {
   const { notes, setNotes } = useAppStore();
-  const [content, setContent] = useState(notes.content || '');
+  const [content, setContent] = useState(() => {
+    const user = authService.getStoredUser();
+    return user?.notes || notes.content || '';
+  });
   const [isSaving, setIsSaving] = useState(false);
 
+  // Sync initial notes to store if loaded from user
   useEffect(() => {
-    // Load notes from stored user data
     const user = authService.getStoredUser();
-    if (user?.notes) {
-      setContent(user.notes);
+    if (user?.notes && user.notes !== notes.content) {
       setNotes({ content: user.notes });
     }
-  }, [setNotes]);
+  }, [setNotes, notes.content]);
 
   const handleChange = async (value: string) => {
     setContent(value);
@@ -288,18 +290,20 @@ const CalculatorView = () => {
 
 const PomodoroView = () => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const timerIntervalRef = useRef<NodeJS.Timeout | null>(null);
+  const timerIntervalRef = useRef<number | null>(null);
   
   const [currentTimer, setCurrentTimer] = useState(1200);
   const [breakTime, setBreakTime] = useState(300);
   const [workTime, setWorkTime] = useState(1200);
   const [currentAction, setCurrentAction] = useState<'Working' | 'Break'>('Working');
 
-  useEffect(() => {
-    renderFrame();
-  }, [currentTimer, currentAction, workTime, breakTime]);
+  const percentageToRadians = (percentage: number): number => {
+    const startAngle = (3 * Math.PI) / 2;
+    const fullCircle = 2 * Math.PI;
+    return startAngle + (fullCircle * (percentage / 100));
+  };
 
-  const renderFrame = () => {
+  const renderFrame = useCallback(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
     
@@ -337,13 +341,11 @@ const PomodoroView = () => {
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
     ctx.fillText(toDuration(currentTimer), 150, 150);
-  };
+  }, [currentTimer, currentAction, workTime, breakTime]);
 
-  const percentageToRadians = (percentage: number): number => {
-    const startAngle = (3 * Math.PI) / 2;
-    const fullCircle = 2 * Math.PI;
-    return startAngle + (fullCircle * (percentage / 100));
-  };
+  useEffect(() => {
+    renderFrame();
+  }, [renderFrame]);
 
   const startTimer = () => {
     if (timerIntervalRef.current === null) {

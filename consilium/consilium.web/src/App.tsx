@@ -9,6 +9,7 @@ import { Profile } from './pages/Profile';
 import { Settings } from './pages/Settings';
 import { useAppStore } from './store/appStore';
 import { authService } from './services/authService';
+import type { Theme } from './types';
 import './App.css';
 
 function App() {
@@ -18,7 +19,7 @@ function App() {
     // Load user's theme preference from stored user data
     const user = authService.getStoredUser();
     if (user?.themePreference) {
-      setTheme(user.themePreference as any);
+      setTheme(user.themePreference as Theme);
     }
   }, [setTheme]);
 

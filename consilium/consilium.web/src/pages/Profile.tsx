@@ -1,9 +1,9 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { authService } from '../services/authService';
 
 declare global {
   interface Window {
-    handleGoogleSignIn?: (response: any) => void;
+    handleGoogleSignIn?: (response: { credential: string }) => void;
   }
 }
 
@@ -11,6 +11,20 @@ export const Profile = () => {
   const [isLoggedIn, setIsLoggedIn] = useState(authService.isLoggedIn());
   const [message, setMessage] = useState('');
   const user = authService.getStoredUser();
+
+  const handleGoogleSignIn = useCallback(async (response: { credential: string }) => {
+    try {
+      const user = await authService.googleSignIn(response.credential);
+      setIsLoggedIn(true);
+      setMessage(`Welcome, ${user.displayName}!`);
+    } catch (error) {
+      console.error('Google sign-in failed:', error);
+      const errorMessage = error && typeof error === 'object' && 'response' in error 
+        ? (error.response as { data?: string })?.data || 'Sign-in failed. Please try again.'
+        : 'Sign-in failed. Please try again.';
+      setMessage(errorMessage);
+    }
+  }, []);
 
   useEffect(() => {
     // Only initialize if not logged in
@@ -52,18 +66,7 @@ export const Profile = () => {
 
     // Cleanup
     return () => clearInterval(checkGoogleLoaded);
-  }, [isLoggedIn]);
-
-  const handleGoogleSignIn = async (response: any) => {
-    try {
-      const user = await authService.googleSignIn(response.credential);
-      setIsLoggedIn(true);
-      setMessage(`Welcome, ${user.displayName}!`);
-    } catch (error: any) {
-      console.error('Google sign-in failed:', error);
-      setMessage(error.response?.data || 'Sign-in failed. Please try again.');
-    }
-  };
+  }, [isLoggedIn, handleGoogleSignIn]);
 
   // Make the callback available globally for Google
   useEffect(() => {
@@ -71,7 +74,7 @@ export const Profile = () => {
     return () => {
       delete window.handleGoogleSignIn;
     };
-  }, []);
+  }, [handleGoogleSignIn]);
 
   const handleLogout = () => {
     authService.logOut();

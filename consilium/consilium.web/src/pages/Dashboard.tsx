@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { authService } from '../services/authService';
 import { todoService } from '../services/todoService';
 import { assignmentService } from '../services/assignmentService';
@@ -12,11 +12,7 @@ export const Dashboard = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [showDashboard, setShowDashboard] = useState(false);
 
-  useEffect(() => {
-    initialize();
-  }, []);
-
-  const initialize = async () => {
+  const initialize = useCallback(async () => {
     setIsLoading(true);
     
     const isLoggedIn = authService.isLoggedIn();
@@ -56,8 +52,11 @@ export const Dashboard = () => {
     }
 
     setIsLoading(false);
-  };
+  }, []);
 
+  useEffect(() => {
+    initialize();
+  }, [initialize]);
   if (isLoading) {
     return (
       <div className="flex items-center justify-center min-h-[400px]">

@@ -18,7 +18,7 @@ public class NewFeatureController : ControllerBase {
         logger.LogInformation("New featrure clicked");
         return "Received";
     }
-    
+
     [HttpPost("feedback")]
     public async Task<IResult> PostFeedback([FromBody] FeedbackRequest request) {
         logger.LogInformation("Feedback received");

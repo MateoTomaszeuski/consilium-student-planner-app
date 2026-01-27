@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { assignmentService } from '../services/assignmentService';
 import type { Assignment, Course } from '../types';
 
@@ -16,17 +16,7 @@ export const Assignments = () => {
   });
   const [isLoading, setIsLoading] = useState(true);
 
-  useEffect(() => {
-    loadData();
-  }, []);
-
-  useEffect(() => {
-    if (selectedCourse) {
-      filterAssignments(selectedCourse);
-    }
-  }, [selectedCourse]);
-
-  const loadData = async () => {
+  const loadData = useCallback(async () => {
     setIsLoading(true);
     try {
       const [coursesData, assignmentsData] = await Promise.all([
@@ -42,15 +32,25 @@ export const Assignments = () => {
       console.error('Failed to load assignments:', error);
     }
     setIsLoading(false);
-  };
+  }, []);
 
-  const filterAssignments = (course: Course) => {
+  const filterAssignments = useCallback((course: Course) => {
     // Filter would happen here
     assignmentService.getAllAssignments().then(all => {
       const filtered = all.filter(a => a.courseId === course.id);
       setAssignments(filtered);
     });
-  };
+  }, []);
+
+  useEffect(() => {
+    loadData();
+  }, [loadData]);
+
+  useEffect(() => {
+    if (selectedCourse) {
+      filterAssignments(selectedCourse);
+    }
+  }, [selectedCourse, filterAssignments]);
 
   const addCourse = async () => {
     if (!newCourseName.trim()) return;
