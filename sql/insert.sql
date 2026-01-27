@@ -1,13 +1,8 @@
- -- Insert mock data into HowlDev.User
-    INSERT INTO "HowlDev.User" (email, displayName, role) VALUES
+ -- Insert mock data into user
+    INSERT INTO "user" (email, displayName, role) VALUES
     ('alice@example.com', 'Alice Johnson', 1),
     ('bob@example.com', 'Bob Smith', 2),
     ('charlie@example.com', 'Charlie Brown', 1);
-
-    -- Insert mock data into HowlDev.Key
-    INSERT INTO "HowlDev.Key" (email, apiKey, validatorToken, validatedOn) VALUES
-    ('alice@example.com', 'APIKEY1234567890', 'TOKENVALID12345678901234567890', '2024-03-31 10:00:00'),
-    ('bob@example.com', 'APIKEY0987654321', 'TOKENVALID09876543210987654321', NULL);
 
    --  -- Insert mock data into course
    --  INSERT INTO course (account_email, course_name) VALUES
