@@ -10,7 +10,7 @@
     }
   ],
   "globalHeaders": {
-    "Cross-Origin-Opener-Policy": "same-origin-allow-popups"
+    "X-Content-Type-Options": "nosniff"
   },
   "responseOverrides": {
     "404": {
