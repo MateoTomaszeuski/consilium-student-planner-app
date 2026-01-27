@@ -218,7 +218,7 @@ public class DBService(IDbConnection conn, ILogger<DBService> logger) : IDBServi
         string getUser = """"
             SELECT EXISTS (
                 SELECT 1
-                FROM "HowlDev.User"
+                FROM "user"
                 WHERE email = @otherUser
             );
             """";

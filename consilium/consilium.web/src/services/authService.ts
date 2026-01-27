@@ -1,48 +1,66 @@
 import api from './api';
 
+declare global {
+  interface Window {
+    gapi: any;
+    google: any;
+  }
+}
+
+export interface GoogleUser {
+  email: string;
+  displayName: string;
+  profilePicture?: string;
+  role: number;
+}
+
 export const authService = {
-  async logIn(email: string): Promise<string> {
-    const response = await api.get<string>(`/Account/login/${email}`);
-    const token = response.data;
+  async googleSignIn(idToken: string): Promise<GoogleUser> {
+    const response = await api.post<GoogleUser>('/Account/google-signin', {
+      idToken
+    });
     
-    if (token !== 'Too many unauthorized keys') {
-      localStorage.setItem('consilium_email', email);
-      localStorage.setItem('consilium_token', token);
-    }
+    const user = response.data;
+    localStorage.setItem('consilium_user', JSON.stringify(user));
     
-    return token;
+    return user;
   },
 
-  async checkAuthStatus(): Promise<boolean> {
+  async getCurrentUser(email: string): Promise<GoogleUser | null> {
     try {
-      const response = await api.get('/Account/validate');
-      return response.status === 200;
+      const response = await api.get<GoogleUser>(`/Account/user?email=${email}`);
+      return response.data;
     } catch {
-      return false;
+      return null;
     }
   },
 
-  async logOut(): Promise<void> {
-    await api.get('/Account/logout');
-    localStorage.removeItem('consilium_email');
-    localStorage.removeItem('consilium_token');
+  logOut(): void {
+    localStorage.removeItem('consilium_user');
+    
+    // Sign out from Google
+    if (window.google?.accounts?.id) {
+      window.google.accounts.id.disableAutoSelect();
+    }
   },
 
-  async globalLogOut(): Promise<void> {
-    await api.get('/Account/globalsignout');
-    localStorage.removeItem('consilium_email');
-    localStorage.removeItem('consilium_token');
+  getStoredUser(): GoogleUser | null {
+    const userStr = localStorage.getItem('consilium_user');
+    if (!userStr) return null;
+    
+    try {
+      return JSON.parse(userStr);
+    } catch {
+      return null;
+    }
   },
 
   getStoredEmail(): string {
-    return localStorage.getItem('consilium_email') || '';
-  },
-
-  getStoredToken(): string {
-    return localStorage.getItem('consilium_token') || '';
+    const user = this.getStoredUser();
+    return user?.email || '';
   },
 
   isLoggedIn(): boolean {
-    return !!this.getStoredEmail() && !!this.getStoredToken();
+    return !!this.getStoredUser();
   },
 };

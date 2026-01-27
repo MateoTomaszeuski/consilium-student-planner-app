@@ -1,6 +1,6 @@
 using Consilium.API;
 using Consilium.API.DBServices;
-using EmailAuthenticator;
+using Consilium.API.Services;
 using Npgsql;
 using System.Data;
 // hi
@@ -9,20 +9,31 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Logging.AddConsole();
 
 string connString = builder.Configuration["DB_CONN"] ?? throw new Exception("No connection string was found.");
-builder.Services.AddSingleton<IDbConnection>(provider =>
+builder.Services.AddScoped<IDbConnection>(provider =>
 {
     return new NpgsqlConnection(connString);
 });
 
-builder.Services.AddSingleton<AuthService>();
+builder.Services.AddScoped<GoogleAuthService>();
 builder.Services.AddSingleton<IEmailService, EmailService>();
-builder.Services.AddSingleton<IIDMiddlewareConfig, MiddlewareConfig>();
+
+// Add CORS policy
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowFrontend", policy =>
+    {
+        policy.WithOrigins("http://localhost:5173", "https://localhost:5173")
+              .AllowAnyHeader()
+              .AllowAnyMethod()
+              .AllowCredentials();
+    });
+});
 
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-builder.Services.AddSingleton<IDBService, DBService>();
+builder.Services.AddScoped<IDBService, DBService>();
 
 var feedbackUri = builder.Configuration["FEEDBACK_WEBHOOK"] ?? "";
 if (!string.IsNullOrEmpty(feedbackUri)) {
@@ -41,7 +52,7 @@ if (app.Environment.IsDevelopment() || featureFlag) {
 
 app.UseDefaultFiles();
 app.UseStaticFiles();
-app.UseMiddleware<IdentityMiddleware>();
+app.UseCors("AllowFrontend");
 app.UseRouting();
 
 //change

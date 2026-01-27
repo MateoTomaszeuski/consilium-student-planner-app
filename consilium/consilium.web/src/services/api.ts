@@ -8,15 +8,20 @@ const api = axios.create({
   },
 });
 
-// Add request interceptor to include auth token
+// Add request interceptor to include user email
 api.interceptors.request.use(
   (config) => {
-    const email = localStorage.getItem('consilium_email');
-    const token = localStorage.getItem('consilium_token');
+    const userStr = localStorage.getItem('consilium_user');
     
-    if (email && token) {
-      config.headers['Email'] = email;
-      config.headers['Key'] = token;
+    if (userStr) {
+      try {
+        const user = JSON.parse(userStr);
+        if (user.email) {
+          config.headers['Email-Auth_Email'] = user.email;
+        }
+      } catch (e) {
+        console.error('Failed to parse user data', e);
+      }
     }
     
     return config;

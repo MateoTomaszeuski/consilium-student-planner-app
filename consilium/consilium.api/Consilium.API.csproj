@@ -9,7 +9,7 @@
 
   <ItemGroup>
     <PackageReference Include="Dapper" Version="2.1.66" />
-    <PackageReference Include="EmailAuthenticator" Version="0.8.6" />
+    <PackageReference Include="Google.Apis.Auth" Version="1.68.0" />
     <PackageReference Include="MailKit" Version="4.11.0" />
     <PackageReference Include="MimeKit" Version="4.11.0" />
     <PackageReference Include="Npgsql" Version="9.0.3" />

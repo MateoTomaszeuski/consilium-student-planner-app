@@ -19,14 +19,18 @@ export const Dashboard = () => {
   const initialize = async () => {
     setIsLoading(true);
     
-    const email = authService.getStoredEmail();
-    const user = email ? email.split('@')[0] : 'Guest';
-    setUsername(user);
+    const isLoggedIn = authService.isLoggedIn();
+    const user = authService.getStoredUser();
+    
+    if (user) {
+      setUsername(user.displayName || user.email.split('@')[0]);
+      setOnline(true);
+    } else {
+      setUsername('Guest');
+      setOnline(false);
+    }
 
-    const isOnline = await authService.checkAuthStatus();
-    setOnline(isOnline);
-
-    if (user !== 'Guest' && isOnline) {
+    if (isLoggedIn && user) {
       try {
         const allAssignments = await assignmentService.getAllAssignments();
         const upcomingAssignments = allAssignments

@@ -5,9 +5,9 @@ services:
     restart: always
     shm_size: 128mb
     environment:
-      POSTGRES_PASSWORD: mypassword
-      POSTGRES_USER: consilium-admin
-      POSTGRES_DB: consiliumdb
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_DB: ${POSTGRES_DB}
     volumes:
       - ./sql:/docker-entrypoint-initdb.d
       # - ./dbdata:/var/lib/postgresql/data
@@ -24,9 +24,11 @@ services:
       dockerfile: ../Dockerfiles/Dockerfile
     restart: always
     environment:
-      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_ENVIRONMENT=${ASPNETCORE_ENVIRONMENT}
       - ASPNETCORE_URLS=http://+:8080
-      - DB_CONN=Host=db;Database=consiliumdb;Username=consilium-admin;Password=mypassword
+      - DB_CONN=Host=db;Database=${POSTGRES_DB};Username=${POSTGRES_USER};Password=${POSTGRES_PASSWORD}
+      - GOOGLE_CLIENT_ID=${GOOGLE_CLIENT_ID}
+      - GOOGLE_CLIENT_SECRET=${GOOGLE_CLIENT_SECRET}
       - EmailSettings__SmtpServer=smtp.gmail.com
       - EmailSettings__Port=587
       - EmailSettings__SenderName=Consilium Support
@@ -53,6 +55,7 @@ services:
     environment:
       - NODE_ENV=development
       - VITE_API_BASE_URL=http://localhost:5202/
+      - VITE_GOOGLE_CLIENT_ID=${GOOGLE_CLIENT_ID}
     command: sh -c "corepack enable && corepack prepare pnpm@latest --activate && pnpm install && pnpm run dev"
     networks:
       - consilium-network

@@ -1,7 +1,11 @@
-﻿using EmailAuthenticator;
-using MimeKit;
+﻿using MimeKit;
 
 namespace Consilium.API.DBServices;
+
+public interface IEmailService
+{
+    Task SendValidationEmail(string email, string validationToken);
+}
 
 public class EmailService(IConfiguration config) : IEmailService {
     public async Task SendValidationEmail(string email, string validationToken) {

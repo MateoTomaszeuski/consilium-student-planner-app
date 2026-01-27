@@ -1,9 +1,3 @@
-﻿using EmailAuthenticator;
-
-public class MiddlewareConfig : IIDMiddlewareConfig {
-    public List<string> Paths => new List<string>() { "/", "/account", "/health", "/account/validate", "/timecheck", "/error", "/validate" };
-
-    public TimeSpan? ExpirationDate => new TimeSpan(90, 0, 0, 0);
-
-    public TimeSpan? ReValidationDate => new TimeSpan(10, 0, 0, 0);
-}
+﻿// This file is no longer needed with Google OAuth authentication.
+// Kept for reference during migration.
+// Can be safely deleted after confirming everything works.

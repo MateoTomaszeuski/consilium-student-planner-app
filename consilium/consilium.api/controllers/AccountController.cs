@@ -1,5 +1,5 @@
-﻿using EmailAuthenticator;
 using Microsoft.AspNetCore.Mvc;
+using Consilium.API.Services;
 
 namespace Consilium.API.Controllers;
 
@@ -7,66 +7,97 @@ namespace Consilium.API.Controllers;
 [Route("[controller]")]
 public class AccountController : ControllerBase {
 
-    private readonly AuthService service;
-    private readonly ILogger<AuthService> logger;
+    private readonly GoogleAuthService _authService;
+    private readonly ILogger<AccountController> _logger;
 
-    public AccountController(AuthService service, ILogger<AuthService> logger) {
-        this.service = service;
-        this.logger = logger;
+    public AccountController(GoogleAuthService authService, ILogger<AccountController> logger) {
+        _authService = authService;
+        _logger = logger;
     }
 
-    [HttpGet("all")]
-    public IEnumerable<EmailAccount> GetAllAccounts() {
-        logger.LogInformation("Getting all accounts");
-        return service.GetAllUsers();
+    [HttpPost("google-signin")]
+    public async Task<IActionResult> GoogleSignIn([FromBody] GoogleSignInRequest request)
+    {
+        _logger.LogInformation("Google sign-in attempt");
+
+        if (string.IsNullOrEmpty(request.IdToken))
+        {
+            return BadRequest("ID token is required");
+        }
+
+        var googleUser = await _authService.ValidateGoogleToken(request.IdToken);
+        
+        if (googleUser == null)
+        {
+            _logger.LogWarning("Invalid Google token");
+            return Unauthorized("Invalid Google token");
+        }
+
+        if (!googleUser.EmailVerified)
+        {
+            _logger.LogWarning("Email not verified for {email}", googleUser.Email);
+            return Unauthorized("Email not verified");
+        }
+
+        var user = await _authService.GetOrCreateUser(googleUser);
+        
+        if (user == null)
+        {
+            _logger.LogError("Failed to create/get user for {email}", googleUser.Email);
+            return StatusCode(500, "Failed to create user");
+        }
+
+        _logger.LogInformation("User {email} signed in successfully", user.Email);
+
+        return Ok(new
+        {
+            user.Email,
+            user.DisplayName,
+            user.ProfilePicture,
+            user.Role,
+            Message = "Sign-in successful"
+        });
     }
 
-    [HttpPost]
-    public async Task<string> PostNewAccount(string email) {
-        logger.LogInformation("Creating new account for {email}", email);
-        return await service.AddUser(email);
-    }
+    [HttpGet("user")]
+    public async Task<IActionResult> GetCurrentUser([FromQuery] string email)
+    {
+        if (string.IsNullOrEmpty(email))
+        {
+            return BadRequest("Email is required");
+        }
 
-    [HttpGet("validate")]
-    public IResult ValidateAccount([FromQuery] string email, [FromQuery] string token) {
-        service.Validate(email, token);
-        logger.LogInformation("Validating account for {email}", email);
-        return Results.Redirect("https://final.codyhowell.dev/signedin");
-    }
+        var user = await _authService.GetUserByEmail(email);
+        
+        if (user == null)
+        {
+            return NotFound("User not found");
+        }
 
-    /// <summary>
-    /// Will either return 
-    /// </summary>
-    /// <returns></returns>
-    [HttpGet("valid")]
-    public IResult ValidateAccount() {
-        logger.LogInformation("Validating account");
-        return Results.Ok();
-    }
-
-    [HttpGet("signout/global")]
-    public IResult SignOutOfAllAccounts() {
-        string email = Request.Headers["Email-Auth_Email"]!; // These are validated in middleware to not be null
-        service.GlobalSignOut(email);
-        logger.LogInformation("Signing out of all accounts for {email}", email);
-        return Results.Ok("Done!");
-    }
-
-    [HttpGet("signout")]
-    public IResult SignOutOfAccount() {
-        string email = Request.Headers["Email-Auth_Email"]!;
-        string key = Request.Headers["Email-Auth_Key"]!;
-        logger.LogInformation("Signing out of account for {email}", email);
-        service.KeySignOut(email, key);
-        return Results.Ok("Done!");
+        return Ok(new
+        {
+            user.Email,
+            user.DisplayName,
+            user.ProfilePicture,
+            user.Role
+        });
     }
 
     [HttpDelete("delete")]
-    public IResult DeleteAccount() {
-        string email = Request.Headers["Email-Auth_Email"]!;
+    public async Task<IActionResult> DeleteAccount([FromQuery] string email)
+    {
+        if (string.IsNullOrEmpty(email))
+        {
+            return BadRequest("Email is required");
+        }
 
-        logger.LogInformation("Deleting account for {email}", email);
-        service.DeleteUser(email);
-        return Results.Ok("Done!");
+        _logger.LogInformation("Deleting account for {email}", email);
+        await _authService.DeleteUser(email);
+        return Ok("Account deleted successfully");
     }
+}
+
+public class GoogleSignInRequest
+{
+    public string IdToken { get; set; } = "";
 }

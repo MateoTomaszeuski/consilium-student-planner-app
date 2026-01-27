@@ -1,59 +1,83 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { authService } from '../services/authService';
 
+declare global {
+  interface Window {
+    handleGoogleSignIn?: (response: any) => void;
+  }
+}
+
 export const Profile = () => {
-  const [email, setEmail] = useState('');
   const [isLoggedIn, setIsLoggedIn] = useState(authService.isLoggedIn());
-  const [showUnauthorized, setShowUnauthorized] = useState(false);
   const [message, setMessage] = useState('');
+  const user = authService.getStoredUser();
 
-  const handleLogin = async () => {
-    if (!email || !isValidEmail(email)) {
-      setMessage('Please enter a valid email');
-      return;
-    }
+  useEffect(() => {
+    // Only initialize if not logged in
+    if (isLoggedIn) return;
 
-    try {
-      const token = await authService.logIn(email);
-      
-      if (token === 'Too many unauthorized keys') {
-        setMessage('Too many unauthorized keys. Please try again later.');
-        return;
+    // Initialize Google Sign-In
+    const initializeGoogleSignIn = () => {
+      if (window.google?.accounts?.id) {
+        const clientId = import.meta.env.VITE_GOOGLE_CLIENT_ID;
+        
+        window.google.accounts.id.initialize({
+          client_id: clientId,
+          callback: handleGoogleSignIn,
+        });
+
+        // Render the button
+        const buttonDiv = document.getElementById('google-signin-button');
+        if (buttonDiv) {
+          window.google.accounts.id.renderButton(
+            buttonDiv,
+            { 
+              theme: 'outline', 
+              size: 'large',
+              text: 'signin_with',
+              shape: 'rectangular',
+            }
+          );
+        }
       }
+    };
 
+    // Wait for Google script to load
+    const checkGoogleLoaded = setInterval(() => {
+      if (window.google?.accounts?.id) {
+        clearInterval(checkGoogleLoaded);
+        initializeGoogleSignIn();
+      }
+    }, 100);
+
+    // Cleanup
+    return () => clearInterval(checkGoogleLoaded);
+  }, [isLoggedIn]);
+
+  const handleGoogleSignIn = async (response: any) => {
+    try {
+      const user = await authService.googleSignIn(response.credential);
       setIsLoggedIn(true);
-      setMessage('Login successful! Check your email for authorization.');
-      
-      // Check authorization status
-      const isAuthorized = await authService.checkAuthStatus();
-      setShowUnauthorized(!isAuthorized);
-      
-      if (!isAuthorized) {
-        setMessage('Please authorize the login from your email.');
-      }
-    } catch (error) {
-      console.error('Login failed:', error);
-      setMessage('Login failed. Please try again.');
+      setMessage(`Welcome, ${user.displayName}!`);
+    } catch (error: any) {
+      console.error('Google sign-in failed:', error);
+      setMessage(error.response?.data || 'Sign-in failed. Please try again.');
     }
   };
 
-  const handleLogout = async () => {
-    try {
-      await authService.logOut();
-      setIsLoggedIn(false);
-      setEmail('');
-      setShowUnauthorized(false);
-      setMessage('Logged out successfully');
-    } catch (error) {
-      console.error('Logout failed:', error);
-    }
-  };
+  // Make the callback available globally for Google
+  useEffect(() => {
+    window.handleGoogleSignIn = handleGoogleSignIn;
+    return () => {
+      delete window.handleGoogleSignIn;
+    };
+  }, []);
 
-  const isValidEmail = (email: string): boolean => {
-    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+  const handleLogout = () => {
+    authService.logOut();
+    setIsLoggedIn(false);
+    setMessage('Logged out successfully');
   };
-
-  const username = authService.getStoredEmail().split('@')[0] || '';
 
   return (
     <div className="profile">
@@ -61,37 +85,35 @@ export const Profile = () => {
 
       {!isLoggedIn ? (
         <div className="login-form">
-          <h2>Login</h2>
-          <input
-            type="email"
-            placeholder="Enter your email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            onKeyDown={(e) => e.key === 'Enter' && handleLogin()}
-          />
-          <button onClick={handleLogin} className="btn-primary">
-            Login
-          </button>
+          <h2>Sign in with Google</h2>
+          <div id="google-signin-button" style={{ marginTop: '20px' }}></div>
         </div>
       ) : (
         <div className="profile-info">
-          <h2>Welcome, {username}!</h2>
-          <p>Email: {authService.getStoredEmail()}</p>
-          
-          {showUnauthorized && (
-            <div className="warning">
-              <p>⚠️ Your login needs to be authorized. Please check your email.</p>
-            </div>
+          <h2>Welcome, {user?.displayName}!</h2>
+          {user?.profilePicture && (
+            <img 
+              src={user.profilePicture} 
+              alt="Profile" 
+              style={{ 
+                width: '100px', 
+                height: '100px', 
+                borderRadius: '50%',
+                marginBottom: '20px' 
+              }} 
+            />
           )}
+          <p>Email: {user?.email}</p>
+          <p>Role: {user?.role === 0 ? 'User' : 'Admin'}</p>
 
-          <button onClick={handleLogout} className="btn-danger">
+          <button onClick={handleLogout} className="btn-danger" style={{ marginTop: '20px' }}>
             Logout
           </button>
         </div>
       )}
 
       {message && (
-        <div className={`message ${message.includes('failed') || message.includes('unauthorized') ? 'error' : 'success'}`}>
+        <div className={`message ${message.includes('failed') ? 'error' : 'success'}`}>
           {message}
         </div>
       )}
