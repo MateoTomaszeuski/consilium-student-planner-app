@@ -64,14 +64,14 @@ export const Dashboard = () => {
   }
 
   return (
-    <div className="space-y-8">
-      <h1 className="text-4xl font-bold text-center text-dark-dark">
+    <div className="space-y-6 sm:space-y-8">
+      <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-center text-dark-dark px-2">
         Welcome back, {username}!
       </h1>
 
       {!online && (
-        <div className="bg-light-med border border-dark-med/30 rounded-lg p-6 text-center max-w-3xl mx-auto">
-          <p className="text-dark-dark">
+        <div className="bg-light-med border border-dark-med/30 rounded-lg p-4 sm:p-6 text-center max-w-3xl mx-auto">
+          <p className="text-sm sm:text-base text-dark-dark">
             You are in Guest mode. To use all features, please make sure you're logged in
             and connected to the internet.
           </p>
@@ -79,26 +79,26 @@ export const Dashboard = () => {
       )}
 
       {showDashboard && (
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-          <section className="bg-light-light border border-dark-med/20 rounded-xl p-6 shadow-sm">
-            <h2 className="text-2xl font-bold mb-4 text-dark-dark">Upcoming Assignments</h2>
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 sm:gap-8">
+          <section className="bg-light-light border border-dark-med/20 rounded-xl p-4 sm:p-6 shadow-sm">
+            <h2 className="text-xl sm:text-2xl font-bold mb-4 text-dark-dark">Upcoming Assignments</h2>
             {assignments.length === 0 ? (
               <p className="text-dark-med text-center py-8">No upcoming assignments</p>
             ) : (
-              <div className="space-y-4">
+              <div className="space-y-3 sm:space-y-4">
                 {assignments.map((assignment) => (
                   <div 
                     key={assignment.id} 
-                    className="bg-white border border-dark-med/10 rounded-lg p-4 hover:shadow-md transition-shadow"
+                    className="bg-white border border-dark-med/10 rounded-lg p-3 sm:p-4 hover:shadow-md transition-shadow"
                   >
-                    <h3 className="font-bold text-lg text-dark-dark">{assignment.name}</h3>
+                    <h3 className="font-bold text-base sm:text-lg text-dark-dark">{assignment.name}</h3>
                     {assignment.description && (
-                      <p className="text-dark-med text-sm mt-2 line-clamp-2">
+                      <p className="text-dark-med text-xs sm:text-sm mt-2 line-clamp-2">
                         {assignment.description}
                       </p>
                     )}
                     {assignment.dueDate && (
-                      <p className="text-dark-med text-sm mt-2 text-right">
+                      <p className="text-dark-med text-xs sm:text-sm mt-2 text-right">
                         Due: {assignment.dueDate.toLocaleDateString('en-US', {
                           month: 'short',
                           day: 'numeric',
@@ -112,19 +112,19 @@ export const Dashboard = () => {
             )}
           </section>
 
-          <section className="bg-light-light border border-dark-med/20 rounded-xl p-6 shadow-sm">
-            <h2 className="text-2xl font-bold mb-4 text-dark-dark">Incomplete To-Dos</h2>
+          <section className="bg-light-light border border-dark-med/20 rounded-xl p-4 sm:p-6 shadow-sm">
+            <h2 className="text-xl sm:text-2xl font-bold mb-4 text-dark-dark">Incomplete To-Dos</h2>
             {todos.length === 0 ? (
               <p className="text-dark-med text-center py-8">No incomplete todos</p>
             ) : (
-              <div className="space-y-4">
+              <div className="space-y-3 sm:space-y-4">
                 {todos.map((todo) => (
                   <div 
                     key={todo.id} 
-                    className="bg-white border border-dark-med/10 rounded-lg p-4 hover:shadow-md transition-shadow"
+                    className="bg-white border border-dark-med/10 rounded-lg p-3 sm:p-4 hover:shadow-md transition-shadow"
                   >
-                    <h3 className="font-semibold text-dark-dark">{todo.title}</h3>
-                    <span className="inline-block mt-2 bg-mid-green text-white px-3 py-1 rounded-full text-xs">
+                    <h3 className="font-semibold text-sm sm:text-base text-dark-dark">{todo.title}</h3>
+                    <span className="inline-block mt-2 bg-mid-green text-white px-2 sm:px-3 py-1 rounded-full text-xs">
                       {todo.category}
                     </span>
                   </div>

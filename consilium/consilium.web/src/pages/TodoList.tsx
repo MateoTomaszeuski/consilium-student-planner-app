@@ -107,10 +107,10 @@ export const TodoList = () => {
 
   if (!isAuthenticated) {
     return (
-      <div className="space-y-8">
-        <h1 className="text-3xl font-bold text-center text-dark-dark">Todo List</h1>
-        <div className="bg-light-med border border-dark-med/30 rounded-lg p-6 text-center max-w-3xl mx-auto">
-          <p className="text-dark-dark">
+      <div className="space-y-6 sm:space-y-8">
+        <h1 className="text-2xl sm:text-3xl font-bold text-center text-dark-dark">Todo List</h1>
+        <div className="bg-light-med border border-dark-med/30 rounded-lg p-4 sm:p-6 text-center max-w-3xl mx-auto">
+          <p className="text-sm sm:text-base text-dark-dark">
             You are in Guest mode. To use all features, please go to the Profile page and log in.
           </p>
         </div>
@@ -122,9 +122,9 @@ export const TodoList = () => {
 
   return (
     <div className="max-w-4xl mx-auto">
-      <h1 className="text-3xl font-bold mb-8 text-dark-dark">Todo List</h1>
+      <h1 className="text-2xl sm:text-3xl font-bold mb-6 sm:mb-8 text-dark-dark">Todo List</h1>
 
-      <div className="space-y-4 mb-8">
+      <div className="space-y-3 sm:space-y-4 mb-6 sm:mb-8">
         <div className="flex gap-2 flex-col sm:flex-row">
           <input
             type="text"
@@ -137,20 +137,20 @@ export const TodoList = () => {
           <select
             value={newTodoCategory}
             onChange={(e) => setNewTodoCategory(e.target.value)}
-            className="px-4 py-2 border border-dark-med/30 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-mid-green min-w-35"
+            className="px-3 sm:px-4 py-2 border border-dark-med/30 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-mid-green text-sm sm:text-base"
           >
             {CATEGORIES.map(cat => (
               <option key={cat} value={cat}>{cat}</option>
             ))}
           </select>
-          <button onClick={addTodo} className="px-6 py-2 bg-mid-green text-white rounded-lg hover:bg-dark-green transition-colors font-semibold">Add</button>
+          <button onClick={addTodo} className="px-6 py-2 bg-mid-green text-white rounded-lg hover:bg-dark-green transition-colors font-semibold text-sm sm:text-base">Add</button>
         </div>
 
         <div className="flex gap-2 flex-wrap">
           <select
             value={selectedCategory}
             onChange={(e) => setSelectedCategory(e.target.value)}
-            className="px-4 py-2 border border-dark-med/30 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-mid-green"
+            className="flex-1 sm:flex-none px-3 sm:px-4 py-2 border border-dark-med/30 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-mid-green text-sm sm:text-base"
           >
             <option value="All">All Categories</option>
             {CATEGORIES.map(cat => (
@@ -161,7 +161,7 @@ export const TodoList = () => {
           <select
             value={sortOption}
             onChange={(e) => setSortOption(e.target.value)}
-            className="px-4 py-2 border border-dark-med/30 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-mid-green"
+            className="flex-1 sm:flex-none px-3 sm:px-4 py-2 border border-dark-med/30 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-mid-green text-sm sm:text-base"
           >
             {SORT_OPTIONS.map(option => (
               <option key={option} value={option}>{option}</option>
@@ -169,7 +169,7 @@ export const TodoList = () => {
           </select>
 
           {hasCompletedTasks && (
-            <button onClick={clearCompleted} className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors font-semibold">
+            <button onClick={clearCompleted} className="w-full sm:w-auto px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors font-semibold text-sm sm:text-base">
               Clear Completed
             </button>
           )}
@@ -178,24 +178,24 @@ export const TodoList = () => {
 
       {message && <p className="text-center text-dark-med py-4">{message}</p>}
 
-      <div className="space-y-3">
+      <div className="space-y-2 sm:space-y-3">
         {todos.map(todo => (
-          <div key={todo.id} className={`flex items-center gap-4 p-4 bg-light-light border border-dark-med/20 rounded-lg hover:shadow-md transition-shadow ${todo.isCompleted ? 'opacity-60' : ''}`}>
+          <div key={todo.id} className={`flex items-center gap-2 sm:gap-4 p-3 sm:p-4 bg-light-light border border-dark-med/20 rounded-lg hover:shadow-md transition-shadow ${todo.isCompleted ? 'opacity-60' : ''}`}>
             <input
               type="checkbox"
               checked={todo.isCompleted}
               onChange={() => toggleComplete(todo)}
-              className="w-5 h-5 cursor-pointer accent-mid-green"
+              className="w-4 h-4 sm:w-5 sm:h-5 cursor-pointer accent-mid-green flex-shrink-0"
             />
-            <div className="flex-1">
-              <span className={`block text-dark-dark ${todo.isCompleted ? 'line-through' : ''}`}>
+            <div className="flex-1 min-w-0">
+              <span className={`block text-sm sm:text-base text-dark-dark break-words ${todo.isCompleted ? 'line-through' : ''}`}>
                 {todo.title}
               </span>
-              <span className="text-sm text-dark-med">{todo.category}</span>
+              <span className="text-xs sm:text-sm text-dark-med">{todo.category}</span>
             </div>
             <button 
               onClick={() => deleteTodo(todo.id)} 
-              className="px-4 py-2 text-red-600 border border-red-600 rounded-lg hover:bg-red-600 hover:text-white transition-colors"
+              className="px-3 sm:px-4 py-1.5 sm:py-2 text-xs sm:text-sm text-red-600 border border-red-600 rounded-lg hover:bg-red-600 hover:text-white transition-colors flex-shrink-0"
             >
               Delete
             </button>

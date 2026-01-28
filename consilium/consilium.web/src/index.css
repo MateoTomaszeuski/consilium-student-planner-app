@@ -67,6 +67,28 @@
     font-family: 'Inter', system-ui, sans-serif !important;
     border: none !important;
     padding: 1.5rem;
+    max-width: 100%;
+  }
+
+  @media (max-width: 640px) {
+    .react-calendar {
+      padding: 1rem;
+      font-size: 0.875rem;
+    }
+
+    .react-calendar__navigation button {
+      min-width: 32px;
+      font-size: 0.875rem;
+    }
+
+    .react-calendar__tile {
+      padding: 0.5rem !important;
+      font-size: 0.75rem;
+    }
+
+    .react-calendar__month-view__weekdays {
+      font-size: 0.75rem;
+    }
   }
 
   .react-calendar__tile {

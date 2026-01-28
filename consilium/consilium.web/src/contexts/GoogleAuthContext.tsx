@@ -20,6 +20,7 @@ interface AuthContextType {
   user: GoogleUser | null;
   isAuthenticated: boolean;
   isLoading: boolean;
+  isSigningIn: boolean;
   signIn: () => void;
   signOut: () => void;
   renderGoogleButton: (element: HTMLElement, options?: GoogleButtonConfiguration) => void;
@@ -38,17 +39,19 @@ interface GoogleAuthProviderProps {
 export function GoogleAuthProvider({ children }: GoogleAuthProviderProps) {
   const [user, setUser] = useState<GoogleUser | null>(authService.getStoredUser());
   const [isLoading, setIsLoading] = useState(true);
+  const [isSigningIn, setIsSigningIn] = useState(false);
   const clientId = import.meta.env.VITE_GOOGLE_CLIENT_ID;
 
   const handleCredentialResponse = useCallback(async (response: CredentialResponse) => {
+    setIsSigningIn(true);
     try {
       const newUser = await authService.googleSignIn(response.credential);
       setUser(newUser);
-      console.log('[GoogleAuth] User signed in:', newUser.email);
       // Reload page to ensure clean state after sign-in
       window.location.reload();
     } catch (error) {
       console.error('[GoogleAuth] Error processing credential:', error);
+      setIsSigningIn(false);
       // Don't update user state on error
     }
   }, []);
@@ -74,7 +77,6 @@ export function GoogleAuthProvider({ children }: GoogleAuthProviderProps) {
           use_fedcm_for_prompt: true,
         });
         setIsLoading(false);
-        console.log('[GoogleAuth] Initialized with client ID:', clientId.substring(0, 20) + '...');
       } else {
         console.error('[GoogleAuth] Client ID not configured properly');
         setIsLoading(false);
@@ -147,6 +149,7 @@ export function GoogleAuthProvider({ children }: GoogleAuthProviderProps) {
         user,
         isAuthenticated: !!user,
         isLoading,
+        isSigningIn,
         signIn,
         signOut,
         renderGoogleButton,
@@ -154,6 +157,14 @@ export function GoogleAuthProvider({ children }: GoogleAuthProviderProps) {
         updateNotes,
       }}
     >
+      {isSigningIn && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-8 shadow-xl flex flex-col items-center space-y-4">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-mid-green"></div>
+            <p className="text-lg font-semibold text-dark-dark">Signing you in...</p>
+          </div>
+        </div>
+      )}
       {children}
     </AuthContext.Provider>
   );
