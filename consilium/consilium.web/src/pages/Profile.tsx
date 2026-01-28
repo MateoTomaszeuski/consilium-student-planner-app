@@ -48,7 +48,6 @@ export const Profile = () => {
           client_id: clientId,
           callback: handleGoogleSignIn,
           auto_select: false,
-          use_fedcm_for_prompt: import.meta.env.PROD,
         });
 
         // Render the button
