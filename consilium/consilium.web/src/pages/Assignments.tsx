@@ -40,7 +40,7 @@ export const Assignments = () => {
       console.error('Failed to load assignments:', error);
     }
     setIsLoading(false);
-  }, []);
+  }, [isAuthenticated]);
 
   const filterAssignments = useCallback((course: Course) => {
     // Filter would happen here

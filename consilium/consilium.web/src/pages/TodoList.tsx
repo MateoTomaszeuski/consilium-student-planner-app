@@ -39,7 +39,7 @@ export const TodoList = () => {
       setMessage('Failed to load todos');
     }
     setIsLoading(false);
-  }, []);
+  }, [isAuthenticated]);
 
   const applyFiltersAndSort = useCallback(() => {
     // This would be implemented with proper filtering and sorting logic
