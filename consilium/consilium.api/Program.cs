@@ -54,8 +54,8 @@ if (app.Environment.IsDevelopment() || featureFlag) {
 
 app.UseDefaultFiles();
 app.UseStaticFiles();
-app.UseCors("AllowFrontend");
 app.UseRouting();
+app.UseCors("AllowFrontend");
 
 //change
 app.MapGet("", () =>
