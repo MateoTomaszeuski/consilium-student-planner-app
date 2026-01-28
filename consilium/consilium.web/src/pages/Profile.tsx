@@ -12,6 +12,12 @@ export const Profile = () => {
       setUser(newUser);
       setIsLoggedIn(true);
       setMessage(`Welcome, ${newUser.displayName}!`);
+      
+      // Clean up Google Sign-In button after successful login
+      const buttonDiv = document.getElementById('google-signin-button');
+      if (buttonDiv) {
+        buttonDiv.innerHTML = '';
+      }
     } catch (error) {
       console.error('Google sign-in failed:', error);
       const errorMessage = error && typeof error === 'object' && 'response' in error 
@@ -31,6 +37,12 @@ export const Profile = () => {
       
       if (window.google?.accounts?.id && buttonDiv) {
         const clientId = import.meta.env.VITE_GOOGLE_CLIENT_ID;
+        
+        if (!clientId || clientId === 'YOUR_ACTUAL_CLIENT_ID.apps.googleusercontent.com') {
+          console.error('VITE_GOOGLE_CLIENT_ID is not configured properly');
+          setMessage('Google Sign-In is not configured. Please contact support.');
+          return false;
+        }
         
         window.google.accounts.id.initialize({
           client_id: clientId,
@@ -61,6 +73,8 @@ export const Profile = () => {
       // Double-check login state before initializing
       if (authService.isLoggedIn()) {
         clearInterval(checkReady);
+        setIsLoggedIn(true);
+        setUser(authService.getStoredUser());
         return;
       }
       
