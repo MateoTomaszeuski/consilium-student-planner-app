@@ -4,13 +4,14 @@ import { authService } from '../services/authService';
 export const Profile = () => {
   const [isLoggedIn, setIsLoggedIn] = useState(authService.isLoggedIn());
   const [message, setMessage] = useState('');
-  const user = authService.getStoredUser();
+  const [user, setUser] = useState(authService.getStoredUser());
 
   const handleGoogleSignIn = useCallback(async (response: { credential: string }) => {
     try {
-      const user = await authService.googleSignIn(response.credential);
+      const newUser = await authService.googleSignIn(response.credential);
+      setUser(newUser);
       setIsLoggedIn(true);
-      setMessage(`Welcome, ${user.displayName}!`);
+      setMessage(`Welcome, ${newUser.displayName}!`);
     } catch (error) {
       console.error('Google sign-in failed:', error);
       const errorMessage = error && typeof error === 'object' && 'response' in error 
@@ -74,6 +75,7 @@ export const Profile = () => {
 
   const handleLogout = () => {
     authService.logOut();
+    setUser(null);
     setIsLoggedIn(false);
     setMessage('Logged out successfully');
   };
