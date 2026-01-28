@@ -1,0 +1,158 @@
+import { createContext, useEffect, useState, useCallback } from 'react';
+import type { ReactNode } from 'react';
+import { authService, type GoogleUser } from '../services/authService';
+
+interface GoogleButtonConfiguration {
+  theme?: 'outline' | 'filled_blue' | 'filled_black';
+  size?: 'large' | 'medium' | 'small';
+  text?: 'signin_with' | 'signup_with' | 'continue_with' | 'signin';
+  shape?: 'rectangular' | 'pill' | 'circle' | 'square';
+  logo_alignment?: 'left' | 'center';
+  width?: number;
+}
+
+interface CredentialResponse {
+  credential: string;
+  select_by?: string;
+}
+
+interface AuthContextType {
+  user: GoogleUser | null;
+  isAuthenticated: boolean;
+  isLoading: boolean;
+  signIn: () => void;
+  signOut: () => void;
+  renderGoogleButton: (element: HTMLElement, options?: GoogleButtonConfiguration) => void;
+  updateTheme: (theme: string) => Promise<boolean>;
+  updateNotes: (notes: string) => Promise<boolean>;
+}
+
+const AuthContext = createContext<AuthContextType | undefined>(undefined);
+
+export { AuthContext };
+
+interface GoogleAuthProviderProps {
+  children: ReactNode;
+}
+
+export function GoogleAuthProvider({ children }: GoogleAuthProviderProps) {
+  const [user, setUser] = useState<GoogleUser | null>(authService.getStoredUser());
+  const [isLoading, setIsLoading] = useState(true);
+  const clientId = import.meta.env.VITE_GOOGLE_CLIENT_ID;
+
+  const handleCredentialResponse = useCallback(async (response: CredentialResponse) => {
+    try {
+      const newUser = await authService.googleSignIn(response.credential);
+      setUser(newUser);
+      console.log('[GoogleAuth] User signed in:', newUser.email);
+    } catch (error) {
+      console.error('[GoogleAuth] Error processing credential:', error);
+      // Don't update user state on error
+    }
+  }, []);
+
+  useEffect(() => {
+    // Check for existing user
+    const storedUser = authService.getStoredUser();
+    if (storedUser) {
+      setUser(storedUser);
+    }
+
+    // Load Google Sign-In script
+    const script = document.createElement('script');
+    script.src = 'https://accounts.google.com/gsi/client';
+    script.async = true;
+    script.defer = true;
+    script.onload = () => {
+      if (window.google?.accounts?.id && clientId && clientId !== 'YOUR_ACTUAL_CLIENT_ID.apps.googleusercontent.com') {
+        window.google.accounts.id.initialize({
+          client_id: clientId,
+          callback: handleCredentialResponse,
+          auto_select: false,
+          use_fedcm_for_prompt: true,
+        });
+        setIsLoading(false);
+        console.log('[GoogleAuth] Initialized with client ID:', clientId.substring(0, 20) + '...');
+      } else {
+        console.error('[GoogleAuth] Client ID not configured properly');
+        setIsLoading(false);
+      }
+    };
+    script.onerror = () => {
+      console.error('[GoogleAuth] Failed to load Google Sign-In script');
+      setIsLoading(false);
+    };
+    document.body.appendChild(script);
+
+    return () => {
+      if (document.body.contains(script)) {
+        document.body.removeChild(script);
+      }
+    };
+  }, [clientId, handleCredentialResponse]);
+
+  const signIn = () => {
+    if (window.google?.accounts?.id) {
+      // @ts-expect-error - prompt method exists but may not be in type definitions
+      window.google.accounts.id.prompt();
+    }
+  };
+
+  const signOut = () => {
+    authService.logOut();
+    setUser(null);
+  };
+
+  const renderGoogleButton = (element: HTMLElement, options?: GoogleButtonConfiguration) => {
+    if (window.google?.accounts?.id && !isLoading) {
+      window.google.accounts.id.renderButton(element, {
+        theme: 'outline',
+        size: 'large',
+        text: 'signin_with',
+        shape: 'rectangular',
+        ...options,
+      });
+    }
+  };
+
+  const updateTheme = async (theme: string): Promise<boolean> => {
+    const result = await authService.updateTheme(theme);
+    if (result) {
+      // Update local user state
+      const updatedUser = authService.getStoredUser();
+      if (updatedUser) {
+        setUser(updatedUser);
+      }
+    }
+    return result;
+  };
+
+  const updateNotes = async (notes: string): Promise<boolean> => {
+    const result = await authService.updateNotes(notes);
+    if (result) {
+      // Update local user state
+      const updatedUser = authService.getStoredUser();
+      if (updatedUser) {
+        setUser(updatedUser);
+      }
+    }
+    return result;
+  };
+
+  return (
+    <AuthContext.Provider
+      value={{
+        user,
+        isAuthenticated: !!user,
+        isLoading,
+        signIn,
+        signOut,
+        renderGoogleButton,
+        updateTheme,
+        updateNotes,
+      }}
+    >
+      {children}
+    </AuthContext.Provider>
+  );
+}

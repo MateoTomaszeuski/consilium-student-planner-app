@@ -7,21 +7,22 @@ import { Assignments } from './pages/Assignments';
 import { Tools } from './pages/Tools';
 import { Profile } from './pages/Profile';
 import { Settings } from './pages/Settings';
+import { GoogleAuthProvider } from './contexts/GoogleAuthContext';
 import { useAppStore } from './store/appStore';
-import { authService } from './services/authService';
+import { useAuth } from './hooks/useAuth';
 import type { Theme } from './types';
 import './App.css';
 
-function App() {
+function AppContent() {
   const { theme, setTheme } = useAppStore();
+  const { user } = useAuth();
 
   useEffect(() => {
     // Load user's theme preference from stored user data
-    const user = authService.getStoredUser();
     if (user?.themePreference) {
       setTheme(user.themePreference as Theme);
     }
-  }, [setTheme]);
+  }, [user, setTheme]);
 
   useEffect(() => {
     document.documentElement.setAttribute('data-theme', theme);
@@ -40,6 +41,14 @@ function App() {
         </Routes>
       </Layout>
     </BrowserRouter>
+  );
+}
+
+function App() {
+  return (
+    <GoogleAuthProvider>
+      <AppContent />
+    </GoogleAuthProvider>
   );
 }
 

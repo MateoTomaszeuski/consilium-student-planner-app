@@ -1,10 +1,11 @@
 import { useEffect, useState, useCallback } from 'react';
-import { authService } from '../services/authService';
+import { useAuth } from '../hooks/useAuth';
 import { todoService } from '../services/todoService';
 import { assignmentService } from '../services/assignmentService';
 import type { Assignment, TodoItem } from '../types';
 
 export const Dashboard = () => {
+  const { user, isAuthenticated } = useAuth();
   const [username, setUsername] = useState('Guest');
   const [online, setOnline] = useState(false);
   const [assignments, setAssignments] = useState<Assignment[]>([]);
@@ -15,9 +16,6 @@ export const Dashboard = () => {
   const initialize = useCallback(async () => {
     setIsLoading(true);
     
-    const isLoggedIn = authService.isLoggedIn();
-    const user = authService.getStoredUser();
-    
     if (user) {
       setUsername(user.displayName || user.email.split('@')[0]);
       setOnline(true);
@@ -26,7 +24,7 @@ export const Dashboard = () => {
       setOnline(false);
     }
 
-    if (isLoggedIn && user) {
+    if (isAuthenticated && user) {
       try {
         const allAssignments = await assignmentService.getAllAssignments();
         const upcomingAssignments = allAssignments
@@ -52,14 +50,14 @@ export const Dashboard = () => {
     }
 
     setIsLoading(false);
-  }, []);
+  }, [user, isAuthenticated]);
 
   useEffect(() => {
     initialize();
   }, [initialize]);
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center min-h-[400px]">
+      <div className="flex items-center justify-center min-h-100">
         <div className="text-xl">Loading...</div>
       </div>
     );

@@ -1,9 +1,10 @@
 import { useEffect, useState, useCallback } from 'react';
 import { assignmentService } from '../services/assignmentService';
-import { authService } from '../services/authService';
+import { useAuth } from '../hooks/useAuth';
 import type { Assignment, Course } from '../types';
 
 export const Assignments = () => {
+  const { isAuthenticated } = useAuth();
   const [courses, setCourses] = useState<Course[]>([]);
   const [assignments, setAssignments] = useState<Assignment[]>([]);
   const [selectedCourse, setSelectedCourse] = useState<Course | null>(null);
@@ -20,7 +21,7 @@ export const Assignments = () => {
   const loadData = useCallback(async () => {
     setIsLoading(true);
     
-    if (!authService.isLoggedIn()) {
+    if (!isAuthenticated) {
       setIsLoading(false);
       return;
     }
@@ -108,7 +109,7 @@ export const Assignments = () => {
     );
   }
 
-  if (!authService.isLoggedIn()) {
+  if (!isAuthenticated) {
     return (
       <div className="space-y-8">
         <h1 className="text-3xl font-bold text-center text-dark-dark">Assignments</h1>

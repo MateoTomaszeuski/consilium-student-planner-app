@@ -1,115 +1,39 @@
-import { useState, useEffect, useCallback } from 'react';
-import { authService } from '../services/authService';
+import { useState, useEffect, useRef } from 'react';
+import { useAuth } from '../hooks/useAuth';
 
 export const Profile = () => {
-  const [isLoggedIn, setIsLoggedIn] = useState(authService.isLoggedIn());
+  const { user, isAuthenticated, renderGoogleButton, signOut, isLoading } = useAuth();
   const [message, setMessage] = useState('');
-  const [user, setUser] = useState(authService.getStoredUser());
+  const buttonRef = useRef<HTMLDivElement>(null);
 
-  const handleGoogleSignIn = useCallback(async (response: { credential: string }) => {
-    try {
-      const newUser = await authService.googleSignIn(response.credential);
-      setUser(newUser);
-      setIsLoggedIn(true);
-      setMessage(`Welcome, ${newUser.displayName}!`);
-      
-      // Clean up Google Sign-In button after successful login
-      const buttonDiv = document.getElementById('google-signin-button');
-      if (buttonDiv) {
-        buttonDiv.innerHTML = '';
-      }
-    } catch (error) {
-      console.error('Google sign-in failed:', error);
-      const errorMessage = error && typeof error === 'object' && 'response' in error 
-        ? (error.response as { data?: string })?.data || 'Sign-in failed. Please try again.'
-        : 'Sign-in failed. Please try again.';
-      setMessage(errorMessage);
+  useEffect(() => {
+    // Render Google button when not authenticated and button div is available
+    if (!isAuthenticated && !isLoading && buttonRef.current) {
+      renderGoogleButton(buttonRef.current);
     }
-  }, []);
-
-  useEffect(() => {
-    // Only initialize if not logged in
-    if (isLoggedIn) return;
-
-    // Initialize Google Sign-In
-    const initializeGoogleSignIn = () => {
-      const buttonDiv = document.getElementById('google-signin-button');
-      
-      if (window.google?.accounts?.id && buttonDiv) {
-        const clientId = import.meta.env.VITE_GOOGLE_CLIENT_ID;
-        
-        if (!clientId || clientId === 'YOUR_ACTUAL_CLIENT_ID.apps.googleusercontent.com') {
-          console.error('VITE_GOOGLE_CLIENT_ID is not configured properly');
-          setMessage('Google Sign-In is not configured. Please contact support.');
-          return false;
-        }
-        
-        window.google.accounts.id.initialize({
-          client_id: clientId,
-          callback: handleGoogleSignIn,
-          auto_select: false,
-        });
-
-        // Render the button
-        window.google.accounts.id.renderButton(
-          buttonDiv,
-          { 
-            theme: 'outline', 
-            size: 'large',
-            text: 'signin_with',
-            shape: 'rectangular',
-          }
-        );
-        
-        return true;
-      }
-      
-      return false;
-    };
-
-    // Wait for both Google script and DOM element to be ready
-    const checkReady = setInterval(() => {
-      // Double-check login state before initializing
-      if (authService.isLoggedIn()) {
-        clearInterval(checkReady);
-        setIsLoggedIn(true);
-        setUser(authService.getStoredUser());
-        return;
-      }
-      
-      if (window.google?.accounts?.id && document.getElementById('google-signin-button')) {
-        clearInterval(checkReady);
-        initializeGoogleSignIn();
-      }
-    }, 100);
-
-    // Cleanup
-    return () => clearInterval(checkReady);
-  }, [isLoggedIn, handleGoogleSignIn]);
-
-  // Make the callback available globally for Google
-  useEffect(() => {
-    window.handleGoogleSignIn = handleGoogleSignIn;
-    return () => {
-      delete window.handleGoogleSignIn;
-    };
-  }, [handleGoogleSignIn]);
+  }, [isAuthenticated, isLoading, renderGoogleButton]);
 
   const handleLogout = () => {
-    authService.logOut();
-    setUser(null);
-    setIsLoggedIn(false);
+    signOut();
     setMessage('Logged out successfully');
+    // Clear message after 3 seconds
+    setTimeout(() => setMessage(''), 3000);
   };
 
   return (
     <div className="max-w-4xl mx-auto">
       <h1 className="text-3xl font-bold mb-8 text-dark-dark text-center">Profile</h1>
 
-      {!isLoggedIn ? (
+      {!isAuthenticated ? (
         <div className="bg-light-light border border-dark-med/20 rounded-xl p-8 shadow-sm max-w-md mx-auto">
           <h2 className="text-2xl font-bold mb-6 text-dark-dark text-center">Sign in with Google</h2>
-          <div id="google-signin-button" className="flex justify-center"></div>
+          {isLoading ? (
+            <div className="flex justify-center items-center py-4">
+              <div className="text-dark-med">Loading...</div>
+            </div>
+          ) : (
+            <div ref={buttonRef} className="flex justify-center"></div>
+          )}
         </div>
       ) : (
         <div className="bg-light-light border border-dark-med/20 rounded-xl p-8 shadow-sm max-w-md mx-auto">

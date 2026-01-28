@@ -1,6 +1,6 @@
 import { useEffect, useState, useCallback } from 'react';
 import { todoService } from '../services/todoService';
-import { authService } from '../services/authService';
+import { useAuth } from '../hooks/useAuth';
 import type { TodoItem } from '../types';
 
 const CATEGORIES = ['Misc.', 'School', 'Work'];
@@ -13,6 +13,7 @@ const SORT_OPTIONS = [
 ];
 
 export const TodoList = () => {
+  const { isAuthenticated } = useAuth();
   const [todos, setTodos] = useState<TodoItem[]>([]);
   const [newTodoTitle, setNewTodoTitle] = useState('');
   const [newTodoCategory, setNewTodoCategory] = useState(CATEGORIES[0]);
@@ -24,7 +25,7 @@ export const TodoList = () => {
   const loadTodos = useCallback(async () => {
     setIsLoading(true);
     
-    if (!authService.isLoggedIn()) {
+    if (!isAuthenticated) {
       setIsLoading(false);
       return;
     }
@@ -104,7 +105,7 @@ export const TodoList = () => {
     return <div className="flex items-center justify-center min-h-100 text-xl">Loading todos...</div>;
   }
 
-  if (!authService.isLoggedIn()) {
+  if (!isAuthenticated) {
     return (
       <div className="space-y-8">
         <h1 className="text-3xl font-bold text-center text-dark-dark">Todo List</h1>

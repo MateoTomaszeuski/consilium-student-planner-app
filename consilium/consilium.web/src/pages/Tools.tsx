@@ -1,15 +1,16 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { useAppStore } from '../store/appStore';
-import { authService } from '../services/authService';
+import { useAuth } from '../hooks/useAuth';
 import Calendar from 'react-calendar';
 import 'react-calendar/dist/Calendar.css';
 
 type Tool = 'Notes' | 'Calculator' | 'Pomodoro' | 'Calendar';
 
 export const Tools = () => {
+  const { isAuthenticated } = useAuth();
   const [activeTool, setActiveTool] = useState<Tool>('Notes');
 
-  if (!authService.isLoggedIn()) {
+  if (!isAuthenticated) {
     return (
       <div className="space-y-8">
         <h1 className="text-3xl font-bold text-center text-dark-dark">Tools</h1>
@@ -81,19 +82,18 @@ export const Tools = () => {
 
 const NotesView = () => {
   const { notes, setNotes } = useAppStore();
+  const { user, updateNotes } = useAuth();
   const [content, setContent] = useState(() => {
-    const user = authService.getStoredUser();
     return user?.notes || notes.content || '';
   });
   const [isSaving, setIsSaving] = useState(false);
 
   // Sync initial notes to store if loaded from user
   useEffect(() => {
-    const user = authService.getStoredUser();
     if (user?.notes && user.notes !== notes.content) {
       setNotes({ content: user.notes });
     }
-  }, [setNotes, notes.content]);
+  }, [setNotes, notes.content, user]);
 
   const handleChange = async (value: string) => {
     setContent(value);
@@ -101,7 +101,7 @@ const NotesView = () => {
     
     // Debounce the save to backend
     setIsSaving(true);
-    await authService.updateNotes(value);
+    await updateNotes(value);
     setIsSaving(false);
   };
 

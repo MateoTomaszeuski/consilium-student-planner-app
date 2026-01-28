@@ -1,13 +1,14 @@
 import { useAppStore } from '../store/appStore';
-import { authService } from '../services/authService';
+import { useAuth } from '../hooks/useAuth';
 import type { Theme } from '../types';
 
 const THEMES: Theme[] = ['Green', 'Blue', 'Purple', 'Pink', 'Teal'];
 
 export const Settings = () => {
   const { theme, setTheme } = useAppStore();
+  const { isAuthenticated, updateTheme } = useAuth();
 
-  if (!authService.isLoggedIn()) {
+  if (!isAuthenticated) {
     return (
       <div className="space-y-8">
         <h1 className="text-3xl font-bold text-center text-dark-dark">Settings</h1>
@@ -22,7 +23,7 @@ export const Settings = () => {
 
   const handleThemeChange = async (newTheme: Theme) => {
     setTheme(newTheme);
-    await authService.updateTheme(newTheme);
+    await updateTheme(newTheme);
   };
 
   return (
