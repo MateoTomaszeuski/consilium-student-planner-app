@@ -45,6 +45,8 @@ export function GoogleAuthProvider({ children }: GoogleAuthProviderProps) {
       const newUser = await authService.googleSignIn(response.credential);
       setUser(newUser);
       console.log('[GoogleAuth] User signed in:', newUser.email);
+      // Reload page to ensure clean state after sign-in
+      window.location.reload();
     } catch (error) {
       console.error('[GoogleAuth] Error processing credential:', error);
       // Don't update user state on error
