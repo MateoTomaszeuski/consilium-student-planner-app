@@ -27,7 +27,9 @@ export const Profile = () => {
 
     // Initialize Google Sign-In
     const initializeGoogleSignIn = () => {
-      if (window.google?.accounts?.id) {
+      const buttonDiv = document.getElementById('google-signin-button');
+      
+      if (window.google?.accounts?.id && buttonDiv) {
         const clientId = import.meta.env.VITE_GOOGLE_CLIENT_ID;
         
         window.google.accounts.id.initialize({
@@ -38,31 +40,38 @@ export const Profile = () => {
         });
 
         // Render the button
-        const buttonDiv = document.getElementById('google-signin-button');
-        if (buttonDiv) {
-          window.google.accounts.id.renderButton(
-            buttonDiv,
-            { 
-              theme: 'outline', 
-              size: 'large',
-              text: 'signin_with',
-              shape: 'rectangular',
-            }
-          );
-        }
+        window.google.accounts.id.renderButton(
+          buttonDiv,
+          { 
+            theme: 'outline', 
+            size: 'large',
+            text: 'signin_with',
+            shape: 'rectangular',
+          }
+        );
+        
+        return true;
       }
+      
+      return false;
     };
 
-    // Wait for Google script to load
-    const checkGoogleLoaded = setInterval(() => {
-      if (window.google?.accounts?.id) {
-        clearInterval(checkGoogleLoaded);
+    // Wait for both Google script and DOM element to be ready
+    const checkReady = setInterval(() => {
+      // Double-check login state before initializing
+      if (authService.isLoggedIn()) {
+        clearInterval(checkReady);
+        return;
+      }
+      
+      if (window.google?.accounts?.id && document.getElementById('google-signin-button')) {
+        clearInterval(checkReady);
         initializeGoogleSignIn();
       }
     }, 100);
 
     // Cleanup
-    return () => clearInterval(checkGoogleLoaded);
+    return () => clearInterval(checkReady);
   }, [isLoggedIn, handleGoogleSignIn]);
 
   // Make the callback available globally for Google
