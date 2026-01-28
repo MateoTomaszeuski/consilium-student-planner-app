@@ -1,31 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { authService } from '../services/authService';
 
-declare global {
-  interface Window {
-    handleGoogleSignIn?: (response: { credential: string }) => void;
-    google?: {
-      accounts?: {
-        id?: {
-          initialize: (config: {
-            client_id: string;
-            callback: (response: { credential: string }) => void;
-            auto_select?: boolean;
-            use_fedcm_for_prompt?: boolean;
-          }) => void;
-          renderButton: (parent: HTMLElement, options: {
-            theme?: string;
-            size?: string;
-            text?: string;
-            shape?: string;
-          }) => void;
-          disableAutoSelect: () => void;
-        };
-      };
-    };
-  }
-}
-
 export const Profile = () => {
   const [isLoggedIn, setIsLoggedIn] = useState(authService.isLoggedIn());
   const [message, setMessage] = useState('');
