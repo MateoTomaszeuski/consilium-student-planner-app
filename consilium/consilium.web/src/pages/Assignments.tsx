@@ -159,7 +159,7 @@ export const Assignments = () => {
                 placeholder="Course Name"
                 value={newCourseName}
                 onChange={(e) => setNewCourseName(e.target.value)}
-                className="flex-1 min-w-[200px] px-3 sm:px-4 py-2 border border-dark-med/30 rounded-lg focus:outline-none focus:ring-2 focus:ring-mid-green text-sm sm:text-base"
+                className="flex-1 min-w-[200px] px-3 sm:px-4 py-2 border border-dark-med/30 rounded-lg bg-white text-dark-dark focus:outline-none focus:ring-2 focus:ring-mid-green text-sm sm:text-base"
               />
               <button 
                 onClick={addCourse} 
@@ -200,20 +200,20 @@ export const Assignments = () => {
                   placeholder="Assignment Title"
                   value={newAssignment.name}
                   onChange={(e) => setNewAssignment({ ...newAssignment, name: e.target.value })}
-                  className="w-full px-3 sm:px-4 py-2 border border-dark-med/30 rounded-lg focus:outline-none focus:ring-2 focus:ring-mid-green text-sm sm:text-base"
+                  className="w-full px-3 sm:px-4 py-2 border border-dark-med/30 rounded-lg bg-white text-dark-dark focus:outline-none focus:ring-2 focus:ring-mid-green text-sm sm:text-base"
                 />
                 <textarea
                   placeholder="Description"
                   value={newAssignment.description}
                   onChange={(e) => setNewAssignment({ ...newAssignment, description: e.target.value })}
-                  className="w-full px-3 sm:px-4 py-2 border border-dark-med/30 rounded-lg focus:outline-none focus:ring-2 focus:ring-mid-green resize-none text-sm sm:text-base"
+                  className="w-full px-3 sm:px-4 py-2 border border-dark-med/30 rounded-lg bg-white text-dark-dark focus:outline-none focus:ring-2 focus:ring-mid-green resize-none text-sm sm:text-base"
                   rows={4}
                 />
                 <input
                   type="date"
                   value={newAssignment.dueDate}
                   onChange={(e) => setNewAssignment({ ...newAssignment, dueDate: e.target.value })}
-                  className="w-full px-3 sm:px-4 py-2 border border-dark-med/30 rounded-lg focus:outline-none focus:ring-2 focus:ring-mid-green text-sm sm:text-base"
+                  className="w-full px-3 sm:px-4 py-2 border border-dark-med/30 rounded-lg bg-white text-dark-dark focus:outline-none focus:ring-2 focus:ring-mid-green text-sm sm:text-base"
                 />
                 <div className="flex gap-2 sm:gap-3 justify-end flex-wrap">
                   <button 

@@ -26,7 +26,7 @@ export const assignmentService = {
   },
 
   async deleteAssignment(id: number): Promise<void> {
-    await api.delete(`/Assignment/${id}`);
+    await api.delete(`/Assignment?assignmentId=${id}`);
   },
 
   async addCourse(course: Omit<Course, 'id'>): Promise<void> {
@@ -34,7 +34,7 @@ export const assignmentService = {
   },
 
   async deleteCourse(id: number): Promise<void> {
-    await api.delete(`/Assignment/course/${id}`);
+    await api.delete(`/Assignment/course?courseId=${id}`);
   },
 
   async startAssignment(assignment: Assignment): Promise<void> {
